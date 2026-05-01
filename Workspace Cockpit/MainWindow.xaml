@@ -1,0 +1,210 @@
+﻿<Window x:Class="Workspace_Cockpit.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Workspace_Cockpit"
+        mc:Ignorable="d"
+        Title="Workspace_Cockpit"
+        Height="760"
+        Width="1200"
+        MinWidth="900"
+        MinHeight="600"
+        Background="#0d1117"
+        Foreground="#E5E7EB"
+        FontFamily="Segoe UI">
+    
+    <Window.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#111827"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="Margin" Value="0, 0, 0, 16"/>
+        </Style>
+        
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <Style TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10"></Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Border Grid.Column="0"
+                Background="#111827"
+                CornerRadius="18"
+                Padding="16">
+            
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Workspaces"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Margin="0,0,0,16"/>
+                
+                <Button DockPanel.Dock="Bottom"
+                        Content="+ New workspace"
+                        Click="NewWorkspace_Click"/>
+                
+                <ListBox x:Name="WorkspaceList"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="#E5E7EB"
+                         SelectionChanged="WorkspaceList_OnSelectionChanged">
+                    
+                    <ListBoxItem Content="Action Inbox"/>
+                    <ListBoxItem Content="Изучение Redis"/>
+                    <ListBoxItem Content="Статья про OpenTelemetry"/>
+                    <ListBoxItem Content="Home Server"/>
+                    <ListBoxItem Content="Weekly Review"/>
+                </ListBox>
+            </DockPanel>
+        </Border>
+        
+        <ScrollViewer Grid.Column="1"
+                      Margin="20,0,0,0"
+                      VerticalScrollBarVisibility="Auto">
+            
+            <StackPanel>
+                <TextBlock x:Name="WorkspaceTitle"
+                           Text="Action Inbox"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Margin="0,0,0,6"/>
+                
+                <TextBlock Text="Pet-проект для Windows desktop app"
+                           Foreground="#94A3B8"
+                           FontSize="15"
+                           Margin="0,0,0,20"/>
+                
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Resume Note"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        
+                        <TextBlock x:Name="ResumeNoteText"
+                                   Text="Остановился на OpenTelemetry. Следующий шаг — добавить trace для GenerateActionsJob и проверить span в Aspire Dashboard."
+                                   Foreground="#CBD5E1"
+                                   FontSize="15"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Quick Actions"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,12"/>
+
+                        <WrapPanel>
+                            <Button Content="Open IDE"
+                                    Tag="Open IDE"
+                                    Click="ActionButton_Click"/>
+
+                            <Button Content="Open Terminal"
+                                    Tag="Open Terminal"
+                                    Click="ActionButton_Click"/>
+
+                            <Button Content="Run Docker"
+                                    Tag="Run Docker"
+                                    Click="ActionButton_Click"/>
+
+                            <Button Content="Open Notes"
+                                    Tag="Open Notes"
+                                    Click="ActionButton_Click"/>
+
+                            <Button Content="Open Dashboard"
+                                    Tag="Open Dashboard"
+                                    Click="ActionButton_Click"/>
+                        </WrapPanel>
+
+                        <Separator Margin="0,8,0,12"/>
+
+                        <Button Content="Start workspace"
+                                Tag="Start workspace"
+                                Click="ActionButton_Click"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Preflight Checks"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,12"/>
+
+                        <TextBlock Text="4 OK / 1 Warning / 1 Error"
+                                   FontSize="15"
+                                   Foreground="#CBD5E1"
+                                   Margin="0,0,0,12"/>
+
+                        <WrapPanel>
+                            <Button Content="Run checks"
+                                    Tag="Run checks"
+                                    Click="ActionButton_Click"/>
+
+                            <Button Content="Copy report"
+                                    Tag="Copy report"
+                                    Click="ActionButton_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+                
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Recent Notes"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,12"/>
+
+                        <TextBlock Text="• Проверить ActivitySource name"
+                                   Foreground="#CBD5E1"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="• Dashboard не отвечает"
+                                   Foreground="#CBD5E1"
+                                   Margin="0,0,0,6"/>
+
+                        <TextBlock Text="• Redis пока не нужен в MVP"
+                                   Foreground="#CBD5E1"/>
+                    </StackPanel>
+                </Border>
+                
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Execution Log"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,12"/>
+
+                        <ListBox x:Name="ExecutionLog"
+                                 Height="140"
+                                 Background="#020617"
+                                 Foreground="#CBD5E1"
+                                 BorderThickness="0"/>
+                    </StackPanel>
+                </Border>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
