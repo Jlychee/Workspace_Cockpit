@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workspace Cockpit", "Workspace Cockpit\Workspace Cockpit.csproj", "{6DA1E1D4-475F-4608-9E58-715E6B392036}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{5CE2660D-2986-42C5-B73C-3B48A78C5B94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{6DA1E1D4-475F-4608-9E58-715E6B392036}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DA1E1D4-475F-4608-9E58-715E6B392036}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DA1E1D4-475F-4608-9E58-715E6B392036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CE2660D-2986-42C5-B73C-3B48A78C5B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CE2660D-2986-42C5-B73C-3B48A78C5B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CE2660D-2986-42C5-B73C-3B48A78C5B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CE2660D-2986-42C5-B73C-3B48A78C5B94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

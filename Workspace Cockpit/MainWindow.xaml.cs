@@ -1,72 +1,190 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using Models;
 
 namespace Workspace_Cockpit;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
-    private void AddLog(string message)
+    public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
+    public WorkspaceItem? selectedWorkspace;
+    public WorkspaceAction? selectedAction;
+    public WorkspaceNote? selectedNote;
+
+    public WorkspaceItem? SelectedWorkspace
     {
-        var time = DateTime.Now.ToString("HH:mm:ss");
-        ExecutionLog.Items.Insert(0, $"{time} {message}");
+        get => selectedWorkspace;
+        set
+        {
+            selectedWorkspace = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public WorkspaceAction? SelectedAction
+    {
+        get => selectedAction;
+        set
+        {
+            selectedAction = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public WorkspaceNote? SelectedNote
+    {
+        get => selectedNote;
+        set
+        {
+            selectedNote = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public MainWindow()
     {
         InitializeComponent();
-        AddLog("Application started");
+        CreateTestData();
+
+        SelectedWorkspace = Workspaces.FirstOrDefault();
+        DataContext = this;
     }
 
-    private void WorkspaceList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void CreateTestData()
     {
-        if (WorkspaceList.SelectedItem is not ListBoxItem selectedItem)
-            return;
+        var workspace = new WorkspaceItem
+        {
+            Name = "Action Inbox",
+            RootPath = @"C:\Projects\ActionInbox",
+            Meta = "Вчера · 4 actions · 3 notes",
+            ResumeText =
+                "Остановился на OpenTelemetry. Следующий шаг — добавить trace для GenerateActionsJob и проверить span в Aspire Dashboard.",
+        };
 
-        var workspaceName = selectedItem.Content?.ToString() ?? "Unknown workspace";
+        workspace.Actions.Add(new WorkspaceAction
+        {
+            Name = "Open IDE",
+            Type = "Open File",
+            Target = @"C:\Projects\ActionInbox\ActionInbox.sln",
+            WorkingDirectory = @"C:\Projects\ActionInbox"
+        });
 
-        WorkspaceTitle.Text = workspaceName;
-        ResumeNoteText.Text = GetFakeResumeNote(workspaceName);
+        workspace.Actions.Add(new WorkspaceAction
+        {
+            Name = "Open terminal",
+            Type = "Run Command",
+            Target = @"wt.exe -d C:\Projects\ActionInbox",
+            WorkingDirectory = @"C:\Projects\ActionInbox"
+        });
 
-        AddLog($"Workspace selected: {workspaceName}");
+        workspace.Actions.Add(new WorkspaceAction
+        {
+            Name = "Run docker",
+            Type = "Run Command",
+            Target = "docker compose up -d",
+            WorkingDirectory = @"C:\Projects\ActionInbox"
+        });
+
+        workspace.Notes.Add(new WorkspaceNote
+        {
+            Type = "General",
+            Text = "Проверить ActivitySource name — возможно, из-за него trace не отображается."
+        });
+
+        workspace.Notes.Add(new WorkspaceNote
+        {
+            Type = "Runbook",
+            Text = "Если Dashboard не открывается — сначала запустить AppHost."
+        });
+
+        Workspaces.Add(workspace);
+
+        Workspaces.Add(new WorkspaceItem
+        {
+            Name = "Изучение Redis",
+            RootPath = @"C:\Projects\RedisSandbox",
+            Meta = "3 дня назад · 0 actions · 0 notes",
+            ResumeText = "Разобраться с persistence и pub/sub.",
+        });
     }
 
-    // TODO: убрать хардкод
-    private string GetFakeResumeNote(string workspaceName) => workspaceName switch
+    private void Minimize_Click(object sender, RoutedEventArgs e)
     {
-        "Action Inbox" =>
-            "Остановился на OpenTelemetry. Следующий шаг — добавить trace для GenerateActionsJob и проверить span в Aspire Dashboard.",
+        WindowState = WindowState.Minimized;
+    }
 
-        "Изучение Redis" =>
-            "Следующий шаг — повторить структуры данных Redis и написать маленький пример с cache invalidation.",
-
-        "Статья про OpenTelemetry" =>
-            "Нужно дописать раздел про traces и показать пример цепочки StartWorkspace → RunChecks → ExecuteActions.",
-
-        "Home Server" =>
-            "Проверить docker compose файл и список сервисов, которые должны стартовать после reboot.",
-
-        "Weekly Review" =>
-            "Собрать parking lot заметки и выбрать 3 главных задачи на следующую неделю.",
-
-        _ =>
-            "Пока нет resume note."
-    };
-
-    private void ActionButton_Click(object sender, RoutedEventArgs e)
+    private void Maximize_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button)
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void DeleteNote_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null || SelectedNote is null)
             return;
+
+        SelectedWorkspace.Notes.Remove(SelectedNote);
+    }
+
+    private void AddNote_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null)
+            return;
+
+        var window = new AddNoteWindow { Owner = this };
+
+        var result = window.ShowDialog();
         
-        var actionName = button.Tag?.ToString() ?? button.Content?.ToString() ?? "Unknown action";
-        AddLog($"Action clicked: {actionName}");
+        if (result != true)
+            return;
+
+        SelectedWorkspace.Notes.Add(window.CreatedNote);
     }
 
-    private void NewWorkspace_Click(object sender, RoutedEventArgs e)
+    private void RunAction_Click(object sender, RoutedEventArgs e)
     {
-        AddLog("New Workspace created");
-        MessageBox.Show("Позже здесь будет создание workspace.", "Workspace Cockpit");
+        throw new NotImplementedException();
+    }
+
+    private void RunSelectedAction_Click(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void EditAction_Click(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DeleteAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null || SelectedAction is null)
+            return;
+
+        SelectedWorkspace.Actions.Remove(SelectedAction);
+    }
+
+    private void AddAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null || SelectedAction is null)
+            return;
+
+        SelectedWorkspace.Actions.Add(SelectedAction);
     }
 }
