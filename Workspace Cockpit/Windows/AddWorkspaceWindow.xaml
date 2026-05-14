@@ -1,0 +1,142 @@
+﻿<Window x:Class="Workspace_Cockpit.AddWorkspaceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Add workspace"
+        Width="480"
+        Height="350"
+        MinWidth="480"
+        MinHeight="350"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{StaticResource WindowBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI">
+
+    <WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="42"
+                            ResizeBorderThickness="0"
+                            CornerRadius="0"
+                            GlassFrameThickness="0" />
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource WindowBrush}"
+            BorderBrush="{StaticResource LineBrush}"
+            BorderThickness="1">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="42" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Titlebar -->
+            <Border Grid.Row="0"
+                    Background="#0D1117"
+                    BorderBrush="{StaticResource Line2Brush}"
+                    BorderThickness="0,0,0,1">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="14,0,0,0">
+
+                        <TextBlock Text="⬡"
+                                   Foreground="{StaticResource BlueBrush}"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Margin="0,0,8,0" />
+
+                        <TextBlock x:Name="WindowTitleTextBlock"
+                                   Text="Add workspace"
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="×"
+                            Style="{StaticResource CloseTitleBarButton}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            FontSize="18"
+                            Click="Close_Click" />
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <Grid Grid.Row="1"
+                  Margin="16">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="18" />
+
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="12" />
+
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="Новый workspace"
+                               FontSize="18"
+                               FontWeight="Bold" />
+
+                    <TextBlock Text="Создай отдельное пространство для проекта, задачи или темы."
+                               Margin="0,4,0,0"
+                               FontSize="12"
+                               Foreground="{StaticResource MutedBrush}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!-- Name -->
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="Название"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}"
+                               Margin="0,0,0,5" />
+
+                    <TextBox x:Name="NameTextBox" />
+                </StackPanel>
+
+                <!-- Root path -->
+                <StackPanel Grid.Row="4">
+                    <TextBlock Text="Root path"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource MutedBrush}"
+                               Margin="0,0,0,5" />
+
+                    <TextBox x:Name="RootPathTextBox" />
+                </StackPanel>
+
+                <!-- Buttons -->
+                <StackPanel Grid.Row="6"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,18,0,0">
+
+                    <Button Content="Cancel"
+                            Margin="0,0,8,0"
+                            Click="Cancel_Click" />
+
+                    <Button Content="Create"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="Save_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

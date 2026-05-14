@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using Models;
+using Workspace_Cockpit.Helpers;
 
 namespace Workspace_Cockpit;
 
@@ -22,7 +23,7 @@ public partial class AddNoteWindow : Window
     {
         if (string.IsNullOrWhiteSpace(NoteTextBox.Text))
         {
-            MessageBox.Show("Введите текст заметки.");
+            AppMessageBox.Show(this, "Предупреждение", "Введите текст заметки.");
             return;
         }
 

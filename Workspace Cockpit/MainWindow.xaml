@@ -171,7 +171,8 @@
                                 Padding="12"
                                 BorderBrush="{StaticResource Line2Brush}"
                                 BorderThickness="0,1,0,0">
-                            <Button Content="+ New workspace" />
+                            <Button Content="+ New workspace" 
+                                    Click="NewWorkspace_Click"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -317,7 +318,7 @@
                                         <ListBox Grid.Row="1"
                                                  Margin="14,12"
                                                  ItemsSource="{Binding SelectedWorkspace.Actions}"
-                                                 SelectedItem="{Binding SelectedAction, Mode=TwoWay}">
+                                                 SelectedItem="{Binding SelectedAction}">
 
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>

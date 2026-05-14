@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Models;
+using Workspace_Cockpit.Helpers;
 
 namespace Workspace_Cockpit;
 
@@ -73,7 +74,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         workspace.Actions.Add(new WorkspaceAction
         {
             Name = "Open IDE",
-            Type = "Open File",
             Target = @"C:\Projects\ActionInbox\ActionInbox.sln",
             WorkingDirectory = @"C:\Projects\ActionInbox"
         });
@@ -81,7 +81,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         workspace.Actions.Add(new WorkspaceAction
         {
             Name = "Open terminal",
-            Type = "Run Command",
             Target = @"wt.exe -d C:\Projects\ActionInbox",
             WorkingDirectory = @"C:\Projects\ActionInbox"
         });
@@ -89,7 +88,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         workspace.Actions.Add(new WorkspaceAction
         {
             Name = "Run docker",
-            Type = "Run Command",
             Target = "docker compose up -d",
             WorkingDirectory = @"C:\Projects\ActionInbox"
         });
@@ -169,7 +167,29 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void EditAction_Click(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        if (SelectedWorkspace is null || SelectedAction is null)
+        {
+            AppMessageBox.Show(this, "Предупреждение", "Выбери action для изменения");
+            return; 
+        }
+
+        var window = new AddActionWindow(SelectedAction)
+        {
+            Owner = this
+        };
+        
+        if (window.ShowDialog() != true)
+            return;
+        
+        var index = SelectedWorkspace.Actions.IndexOf(SelectedAction);
+        
+        if (index < 0)
+            return;
+
+        SelectedWorkspace.Actions[index] = window.ResultAction;
+        SelectedAction = window.ResultAction;
+
+
     }
 
     private void DeleteAction_Click(object sender, RoutedEventArgs e)
@@ -182,9 +202,32 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void AddAction_Click(object sender, RoutedEventArgs e)
     {
-        if (SelectedWorkspace is null || SelectedAction is null)
+        if  (SelectedWorkspace is null)
             return;
+        
+        var window = new AddActionWindow
+        {
+            Owner = this
+        };
+        
+        if (window.ShowDialog() != true)
+            return;
+        
+        SelectedWorkspace.Actions.Add(window.ResultAction);
+        SelectedAction = window.ResultAction;
+    }
 
-        SelectedWorkspace.Actions.Add(SelectedAction);
+    private void NewWorkspace_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new AddWorkspaceWindow()
+        {
+            Owner = this
+        };
+        
+        if (window.ShowDialog() != true)
+            return;
+        
+        Workspaces.Add(window.ResultWorkspace);
+        SelectedWorkspace = window.ResultWorkspace;
     }
 }

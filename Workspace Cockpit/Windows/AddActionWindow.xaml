@@ -1,0 +1,168 @@
+﻿<Window x:Class="Workspace_Cockpit.AddActionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Add action"
+        Width="500"
+        Height="440"
+        MinWidth="500"
+        MinHeight="440"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{StaticResource WindowBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI">
+
+    <WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="42"
+                            ResizeBorderThickness="0"
+                            CornerRadius="0"
+                            GlassFrameThickness="0" />
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{StaticResource WindowBrush}"
+            BorderBrush="{StaticResource LineBrush}"
+            BorderThickness="1">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="42" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Titlebar -->
+            <Border Grid.Row="0"
+                    Background="#0D1117"
+                    BorderBrush="{StaticResource Line2Brush}"
+                    BorderThickness="0,0,0,1">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="14,0,0,0">
+
+                        <TextBlock Text="+"
+                                   Foreground="{StaticResource BlueBrush}"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Margin="0,0,8,0" />
+
+                        <TextBlock x:Name="WindowTitleTextBlock"
+                                   Text="Add action"
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="×"
+                            Style="{StaticResource CloseTitleBarButton}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            FontSize="18"
+                            Click="Close_Click" />
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Form -->
+                <Grid Grid.Row="0"
+                      Margin="16,16,16,18">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Новое действие"
+                                   FontSize="18"
+                                   FontWeight="Bold" />
+
+                        <TextBlock
+                            Text="Добавь команду, ссылку, файл или папку, которую можно быстро открыть из workspace."
+                            Margin="0,4,0,0"
+                            FontSize="12"
+                            Foreground="{StaticResource MutedBrush}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Name -->
+                    <StackPanel Grid.Row="2">
+                        <TextBlock Text="Название"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,5" />
+
+                        <TextBox x:Name="NameTextBox" />
+                    </StackPanel>
+
+                    <!-- Target -->
+                    <StackPanel Grid.Row="4">
+                        <TextBlock Text="Target / Command"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,5" />
+
+                        <TextBox x:Name="TargetTextBox" />
+                    </StackPanel>
+
+                    <!-- Working directory -->
+                    <StackPanel Grid.Row="6">
+                        <TextBlock Text="Working directory"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,5" />
+
+                        <TextBox x:Name="WorkingDirectoryTextBox" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Footer buttons -->
+                <Border Grid.Row="1"
+                        Padding="12, 10"
+                        Background="#151B24"
+                        BorderBrush="{StaticResource Line2Brush}"
+                        BorderThickness="0,1,0,0">
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+
+                        <Button Content="Cancel"
+                                Margin="0,0,8,0"
+                                Click="Cancel_Click" />
+
+                        <Button Content="Save"
+                                Style="{StaticResource PrimaryButton}"
+                                Click="Save_Click" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
