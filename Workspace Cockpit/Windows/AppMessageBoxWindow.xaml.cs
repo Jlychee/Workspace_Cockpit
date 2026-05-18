@@ -1,7 +1,6 @@
 ﻿using System.Windows;
-using Models;
 
-namespace Workspace_Cockpit;
+namespace Workspace_Cockpit.Windows;
 
 public partial class AppMessageBoxWindow : Window
 {

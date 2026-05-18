@@ -1,4 +1,4 @@
-﻿<Window x:Class="Workspace_Cockpit.AddWorkspaceWindow"
+﻿<Window x:Class="Workspace_Cockpit.Windows.AddWorkspaceWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
@@ -119,7 +119,20 @@
                                Foreground="{StaticResource MutedBrush}"
                                Margin="0,0,0,5" />
 
-                    <TextBox x:Name="RootPathTextBox" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="RootPathTextBox"
+                                 Grid.Column="0" />
+
+                        <Button Grid.Column="2"
+                                Content="Browse"
+                                Click="BrowseRootPath_Click" />
+                    </Grid>
                 </StackPanel>
 
                 <!-- Buttons -->

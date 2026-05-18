@@ -1,8 +1,10 @@
-﻿using System.Windows;
-using Models;
+using System.IO;
+using System.Windows;
+using Microsoft.Win32;
+using Models.Entities;
 using Workspace_Cockpit.Helpers;
 
-namespace Workspace_Cockpit;
+namespace Workspace_Cockpit.Windows;
 
 public partial class AddWorkspaceWindow : Window
 {
@@ -17,7 +19,7 @@ public partial class AddWorkspaceWindow : Window
     {
         if (string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
-            AppMessageBox.Show(this, "Предупреждение" ,"Введите название workspace.");
+            AppMessageBox.Show(this, "Предупреждение", "Введите название workspace.");
             return;
         }
 
@@ -25,12 +27,26 @@ public partial class AddWorkspaceWindow : Window
         {
             Name = NameTextBox.Text.Trim(),
             RootPath = RootPathTextBox.Text.Trim(),
-            Meta = "0 actions · 0 notes",
             ResumeText = "",
         };
 
         DialogResult = true;
         Close();
+    }
+
+    private void BrowseRootPath_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Выбери папку workspace"
+        };
+
+        var currentPath = RootPathTextBox.Text.Trim();
+        if (Directory.Exists(currentPath))
+            dialog.InitialDirectory = currentPath;
+
+        if (dialog.ShowDialog(this) == true)
+            RootPathTextBox.Text = dialog.FolderName;
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)

@@ -1,16 +1,19 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using Models;
+using Models.Entities;
 using Workspace_Cockpit.Helpers;
 
-namespace Workspace_Cockpit;
+namespace Workspace_Cockpit.Windows;
 
 public partial class AddNoteWindow : Window
 {
     public WorkspaceNote CreatedNote { get; private set; } = new();
+
     public AddNoteWindow()
     {
         InitializeComponent();
+
+        NoteTypeComboBox.ItemsSource = WorkspaceNoteTypes.All;
+        NoteTypeComboBox.SelectedItem = WorkspaceNoteTypes.General;
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -29,9 +32,10 @@ public partial class AddNoteWindow : Window
 
         CreatedNote = new WorkspaceNote
         {
+            Type = NoteTypeComboBox.SelectedItem as string ?? WorkspaceNoteTypes.General,
             Text = NoteTextBox.Text.Trim()
         };
-        
+
         DialogResult = true;
         Close();
     }
