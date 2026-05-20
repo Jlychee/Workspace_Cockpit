@@ -90,6 +90,9 @@
 
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" />
+                        
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
 
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" />
@@ -133,22 +136,39 @@
 
                         <ComboBox x:Name="ActionTypeComboBox"
                                   Height="34"
-                                  Padding="8,4" />
+                                  Padding="8,4"
+                                  SelectionChanged="ActionTypeComboBox_SelectionChanged" />
                     </StackPanel>
 
                     <!-- Target -->
-                    <StackPanel Grid.Row="6">
-                        <TextBlock Text="Target / Command"
+                    <StackPanel Grid.Row="8">
+                        <TextBlock x:Name="TargetLabelTextBlock"
+                                   Text="Target / Command"
                                    FontSize="12"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource MutedBrush}"
                                    Margin="0,0,0,5" />
 
-                        <TextBox x:Name="TargetTextBox" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="TargetTextBox"
+                                     Grid.Column="0" />
+
+                            <Button x:Name="BrowseTargetButton"
+                                    Grid.Column="2"
+                                    Content="Browse"
+                                    Click="BrowseTarget_Click" />
+                        </Grid>
                     </StackPanel>
 
                     <!-- Working directory -->
-                    <StackPanel Grid.Row="8">
+                    <StackPanel x:Name="WorkingDirectoryPanel"
+                                Grid.Row="10">
                         <TextBlock Text="Working directory"
                                    FontSize="12"
                                    FontWeight="SemiBold"

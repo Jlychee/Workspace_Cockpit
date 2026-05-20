@@ -6,7 +6,7 @@ namespace Workspace_Cockpit.Windows;
 
 public partial class AddNoteWindow : Window
 {
-    public WorkspaceNote CreatedNote { get; private set; } = new();
+    public WorkspaceNote ResultNote { get; private set; } = new();
 
     public AddNoteWindow()
     {
@@ -14,6 +14,16 @@ public partial class AddNoteWindow : Window
 
         NoteTypeComboBox.ItemsSource = WorkspaceNoteTypes.All;
         NoteTypeComboBox.SelectedItem = WorkspaceNoteTypes.General;
+    }
+
+    public AddNoteWindow(WorkspaceNote? note) : this()
+    {
+        if (note is null)
+            return;
+
+        WindowTitleTextBlock.Text = "Edit note";
+        NoteTypeComboBox.SelectedItem = note.Type;
+        NoteTextBox.Text = note.Text;
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -30,13 +40,19 @@ public partial class AddNoteWindow : Window
             return;
         }
 
-        CreatedNote = new WorkspaceNote
+        ResultNote = new WorkspaceNote
         {
             Type = NoteTypeComboBox.SelectedItem as string ?? WorkspaceNoteTypes.General,
             Text = NoteTextBox.Text.Trim()
         };
 
         DialogResult = true;
+        Close();
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = false;
         Close();
     }
 }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Infrastructure.Repositories;
-using Models;
 using Models.Entities;
 using Models.Enums;
 using Workspace_Cockpit.Helpers;
@@ -15,7 +14,7 @@ namespace Workspace_Cockpit;
 
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
-    private readonly WorkspaceRepository _repository;
+    private readonly WorkspaceRepository repository;
     private WorkspaceItem? selectedWorkspace;
     private WorkspaceAction? selectedAction;
     private WorkspaceNote? selectedNote;
@@ -64,7 +63,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     public MainWindow(WorkspaceRepository repository)
     {
-        _repository = repository;
+        this.repository = repository;
         InitializeComponent();
         DataContext = this;
         Loaded += MainWindow_Loaded;
@@ -84,7 +83,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async Task LoadWorkspacesAsync()
     {
-        var workspaces = await _repository.LoadWorkspacesAsync();
+        var workspaces = await repository.LoadWorkspacesAsync();
 
         Workspaces.Clear();
         foreach (var workspace in workspaces)
@@ -109,7 +108,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (workspace.Id > 0)
             {
-                await _repository.UpdateWorkspaceLastOpenedAsync(workspace.Id, now);
+                await repository.UpdateWorkspaceLastOpenedAsync(workspace.Id, now);
                 await ReloadActionRunsAsync(workspace.Id);
             }
         }
@@ -121,7 +120,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async Task ReloadActionRunsAsync(int workspaceId)
     {
-        var runs = await _repository.LoadActionRunsAsync(workspaceId);
+        var runs = await repository.LoadActionRunsAsync(workspaceId);
 
         ActionRuns.Clear();
         foreach (var run in runs)
@@ -157,7 +156,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await _repository.UpdateWorkspaceAsync(SelectedWorkspace);
+            await repository.UpdateWorkspaceAsync(SelectedWorkspace);
             SelectedWorkspace.NotifyDisplayChanged();
             OnPropertyChanged(nameof(SelectedWorkspace));
         }
@@ -175,7 +174,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var note = SelectedNote;
-            await _repository.DeleteNoteAsync(note);
+            await repository.DeleteNoteAsync(note);
             SelectedWorkspace.Notes.Remove(note);
             TouchSelectedWorkspace();
         }
@@ -197,9 +196,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await _repository.AddNoteAsync(SelectedWorkspace.Id, window.CreatedNote);
-            SelectedWorkspace.Notes.Add(window.CreatedNote);
-            TouchSelectedWorkspace(window.CreatedNote.UpdatedAtUtc);
+            await repository.AddNoteAsync(SelectedWorkspace.Id, window.ResultNote);
+            SelectedWorkspace.Notes.Add(window.ResultNote);
+            TouchSelectedWorkspace(window.ResultNote.UpdatedAtUtc);
         }
         catch (Exception ex)
         {
@@ -211,17 +210,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         if (sender is FrameworkElement { Tag: WorkspaceAction action })
             await RunWorkspaceActionAsync(action);
-    }
-
-    private async void RunSelectedAction_Click(object sender, RoutedEventArgs e)
-    {
-        if (SelectedAction is null)
-        {
-            AppMessageBox.Show(this, "Предупреждение", "Выбери action для запуска");
-            return;
-        }
-
-        await RunWorkspaceActionAsync(SelectedAction);
     }
 
     private async void RunAllActions_Click(object sender, RoutedEventArgs e)
@@ -241,7 +229,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var run = await ExecuteActionAsync(action);
-            await _repository.AddActionRunAsync(action, run);
+            await repository.AddActionRunAsync(action, run);
 
             action.NotifyDisplayChanged();
             SelectedWorkspace.NotifyDisplayChanged();
@@ -270,15 +258,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            if (action.ActionType is WorkspaceActionType.File or WorkspaceActionType.Folder or WorkspaceActionType.Url)
+            switch (action.ActionType)
             {
-                StartShellAction(action);
-                run.Status = "Completed";
-                run.OutputPreview = "Started via shell.";
-                return run;
+                case WorkspaceActionType.Command:
+                    await RunCommandAsync(action, run);
+                    break;
+
+                case WorkspaceActionType.File:
+                    OpenFileAction(action, run);
+                    break;
+
+                case WorkspaceActionType.Folder:
+                    OpenFolderAction(action, run);
+                    break;
+
+                case WorkspaceActionType.Url:
+                    OpenUrlAction(action, run);
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unsupported action type: {action.ActionType}");
             }
 
-            await RunCommandAsync(action, run);
             return run;
         }
         catch (Exception ex)
@@ -309,6 +310,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             CreateNoWindow = true
         };
 
+        await RunProcessAsync(process, run);
+    }
+    
+
+    private static async Task RunProcessAsync(Process process, WorkspaceActionRun run)
+    {
         if (!process.Start())
             throw new InvalidOperationException("Process was not started.");
 
@@ -323,23 +330,40 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         run.ExitCode = process.ExitCode;
         run.Status = process.ExitCode == 0 ? "Completed" : "Failed";
         run.OutputPreview = ToPreview(output);
-        run.ErrorMessage = process.ExitCode == 0 ? "" : ToPreview(error);
+        run.ErrorMessage = process.ExitCode == 0
+            ? ""
+            : ToErrorMessage(process.ExitCode, error);
     }
 
-    private void StartShellAction(WorkspaceAction action)
+    private void OpenFileAction(WorkspaceAction action, WorkspaceActionRun run)
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = action.Target,
-            UseShellExecute = true
-        };
+        var filePath = ResolveActionPath(action);
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("File was not found.", filePath);
 
-        var workingDirectory = ResolveWorkingDirectory(action, allowFallback: false);
-        if (!string.IsNullOrWhiteSpace(workingDirectory))
-            startInfo.WorkingDirectory = workingDirectory;
+        OpenShellTarget(filePath);
+        run.Status = "Completed";
+        run.OutputPreview = $"Opened file: {filePath}";
+    }
 
-        if (Process.Start(startInfo) is null)
-            throw new InvalidOperationException("Shell action was not started.");
+    private void OpenFolderAction(WorkspaceAction action, WorkspaceActionRun run)
+    {
+        var folderPath = ResolveActionPath(action);
+        if (!Directory.Exists(folderPath))
+            throw new DirectoryNotFoundException($"Folder was not found: {folderPath}");
+
+        OpenShellTarget(folderPath);
+        run.Status = "Completed";
+        run.OutputPreview = $"Opened folder: {folderPath}";
+    }
+
+    private static void OpenUrlAction(WorkspaceAction action, WorkspaceActionRun run)
+    {
+        var uri = ResolveHttpUri(action.Target);
+
+        OpenShellTarget(uri.AbsoluteUri);
+        run.Status = "Completed";
+        run.OutputPreview = $"Opened url: {uri.AbsoluteUri}";
     }
 
     private string ResolveWorkingDirectory(WorkspaceAction action, bool allowFallback = true)
@@ -359,12 +383,62 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             : "";
     }
 
+    private string ResolveActionPath(WorkspaceAction action)
+    {
+        var target = Environment.ExpandEnvironmentVariables(action.Target.Trim());
+        if (string.IsNullOrWhiteSpace(target))
+            throw new InvalidOperationException("Action target is empty.");
+
+        if (Path.IsPathFullyQualified(target))
+            return Path.GetFullPath(target);
+
+        return Path.GetFullPath(Path.Combine(ResolveWorkingDirectory(action), target));
+    }
+
+    private static Uri ResolveHttpUri(string target)
+    {
+        var value = target.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+            throw new InvalidOperationException("Url is empty.");
+
+        if (!value.Contains("://", StringComparison.Ordinal))
+            value = $"https://{value}";
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new InvalidOperationException($"Url is invalid: {target}");
+        }
+
+        return uri;
+    }
+
+    private static void OpenShellTarget(string target)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = target,
+            UseShellExecute = true
+        };
+
+        if (Process.Start(startInfo) is null)
+            throw new InvalidOperationException("Shell action was not started.");
+    }
+
     private static string ToPreview(string value)
     {
         var preview = value.Trim();
         return preview.Length <= 4000
             ? preview
             : preview[..4000];
+    }
+
+    private static string ToErrorMessage(int exitCode, string error)
+    {
+        var preview = ToPreview(error);
+        return string.IsNullOrWhiteSpace(preview)
+            ? $"Process exited with code {exitCode}."
+            : preview;
     }
 
     private async void EditAction_Click(object sender, RoutedEventArgs e)
@@ -393,7 +467,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             SelectedAction.ActionType = updatedAction.ActionType;
             SelectedAction.UpdatedAtUtc = updatedAction.UpdatedAtUtc;
 
-            await _repository.UpdateActionAsync(SelectedAction);
+            await repository.UpdateActionAsync(SelectedAction);
 
             SelectedAction.NotifyDisplayChanged();
             TouchSelectedWorkspace(SelectedAction.UpdatedAtUtc);
@@ -412,7 +486,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var action = SelectedAction;
-            await _repository.DeleteActionAsync(action);
+            await repository.DeleteActionAsync(action);
             SelectedWorkspace.Actions.Remove(action);
             await ReloadActionRunsAsync(SelectedWorkspace.Id);
             TouchSelectedWorkspace();
@@ -438,7 +512,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await _repository.AddActionAsync(SelectedWorkspace.Id, window.ResultAction);
+            await repository.AddActionAsync(SelectedWorkspace.Id, window.ResultAction);
             SelectedWorkspace.Actions.Add(window.ResultAction);
             SelectedAction = window.ResultAction;
             TouchSelectedWorkspace(window.ResultAction.UpdatedAtUtc);
@@ -461,7 +535,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await _repository.AddWorkspaceAsync(window.ResultWorkspace);
+            await repository.AddWorkspaceAsync(window.ResultWorkspace);
             Workspaces.Add(window.ResultWorkspace);
             SelectedWorkspace = window.ResultWorkspace;
         }
@@ -479,5 +553,40 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         SelectedWorkspace.UpdatedAtUtc = updatedAtUtc ?? DateTime.UtcNow;
         SelectedWorkspace.NotifyDisplayChanged();
         OnPropertyChanged(nameof(SelectedWorkspace));
+    }
+
+    private async void EditNote_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null || SelectedNote is null)
+        {
+            AppMessageBox.Show(this, "Предупреждение", "Выбери note для изменения");
+            return;
+        }
+
+        var window = new AddNoteWindow(SelectedNote)
+        {
+            Owner = this
+        };
+
+        if (window.ShowDialog() != true)
+            return;
+
+        try
+        {
+            var updatedNote = window.ResultNote;
+
+            SelectedNote.Text = updatedNote.Text;
+            SelectedNote.Type = updatedNote.Type;
+            SelectedNote.UpdatedAtUtc = updatedNote.UpdatedAtUtc;
+
+            await repository.UpdateNoteAsync(SelectedNote);
+
+            SelectedNote.NotifyDisplayChanged();
+            TouchSelectedWorkspace(SelectedNote.UpdatedAtUtc);
+        }
+        catch (Exception ex)
+        {
+            AppMessageBox.Show(this, "Edit note error", ex.Message);
+        }
     }
 }
