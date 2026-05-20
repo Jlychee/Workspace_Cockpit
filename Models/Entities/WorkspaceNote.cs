@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace Models.Entities;
 
 public static class WorkspaceNoteTypes
@@ -16,7 +19,7 @@ public static class WorkspaceNoteTypes
     ];
 }
 
-public class WorkspaceNote
+public class WorkspaceNote : INotifyPropertyChanged
 {
     public int Id { get; set; }
     public int WorkspaceId { get; set; }
@@ -26,6 +29,25 @@ public class WorkspaceNote
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
+    public string UpdatedText =>
+        $"Updated {UpdatedAtUtc.ToLocalTime():dd.MM.yyyy HH:mm}";
+
     public string Header =>
-        $"{Type} · Updated {UpdatedAtUtc.ToLocalTime():dd.MM.yyyy HH:mm}";
+        $"{Type} - {UpdatedText}";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void NotifyDisplayChanged()
+    {
+        OnPropertyChanged(nameof(Text));
+        OnPropertyChanged(nameof(Type));
+        OnPropertyChanged(nameof(UpdatedAtUtc));
+        OnPropertyChanged(nameof(UpdatedText));
+        OnPropertyChanged(nameof(Header));
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

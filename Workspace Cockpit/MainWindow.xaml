@@ -129,8 +129,9 @@
                                             <Setter Property="Visibility" Value="Collapsed" />
 
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text.Length, ElementName=WorkspaceSearchTextBox}"
-                                                             Value="0">
+                                                <DataTrigger
+                                                    Binding="{Binding Text.Length, ElementName=WorkspaceSearchTextBox}"
+                                                    Value="0">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -171,8 +172,8 @@
                                 Padding="12"
                                 BorderBrush="{StaticResource Line2Brush}"
                                 BorderThickness="0,1,0,0">
-                            <Button Content="+ New workspace" 
-                                    Click="NewWorkspace_Click"/>
+                            <Button Content="+ New workspace"
+                                    Click="NewWorkspace_Click" />
                         </Border>
                     </Grid>
                 </Border>
@@ -193,160 +194,307 @@
                         </ScrollViewer.Style>
 
                         <StackPanel Margin="22">
-                        <!-- Workspace header -->
-                        <Grid Margin="0,0,0,18">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+                            <!-- Workspace header -->
+                            <Grid Margin="0,0,0,18">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{Binding SelectedWorkspace.Name}"
-                                           FontSize="24"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,4" />
-
-                                <TextBlock Text="{Binding SelectedWorkspace.RootPath}"
-                                           FontFamily="Consolas"
-                                           FontSize="12"
-                                           Foreground="{StaticResource Muted2Brush}" />
-
-                                <TextBlock Text="{Binding SelectedWorkspace.DetailsText}"
-                                           Margin="0,5,0,0"
-                                           FontSize="12"
-                                           Foreground="{StaticResource Muted2Brush}" />
-                            </StackPanel>
-
-                            <WrapPanel Grid.Column="1"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Top">
-
-                                <Button Content="▶ Run all"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Margin="0,0,8,0"
-                                        Click="RunAllActions_Click" />
-
-                                <Button Content="Edit" />
-                            </WrapPanel>
-                        </Grid>
-
-                        <!-- Resume block -->
-                        <Border Background="{StaticResource Panel2Brush}"
-                                BorderBrush="{StaticResource Line2Brush}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Margin="0,0,0,18">
-
-                            <Grid>
-                                <Border Width="3"
-                                        HorizontalAlignment="Left"
-                                        Background="{StaticResource BlueBrush}"
-                                        CornerRadius="8,0,0,8" />
-
-                                <StackPanel Margin="14">
-                                    <TextBlock Text="Где я остановился"
-                                               FontSize="12"
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding SelectedWorkspace.Name}"
+                                               FontSize="24"
                                                FontWeight="Bold"
-                                               Foreground="{StaticResource Muted2Brush}"
-                                               TextOptions.TextFormattingMode="Display"
-                                               Margin="0,0,0,8" />
+                                               Margin="0,0,0,4" />
 
-                                    <TextBox MinHeight="78"
-                                             FontSize="14"
-                                             TextWrapping="Wrap"
-                                             AcceptsReturn="True"
-                                             VerticalScrollBarVisibility="Auto"
-                                             Text="{Binding SelectedWorkspace.ResumeText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="{Binding SelectedWorkspace.RootPath}"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               Foreground="{StaticResource Muted2Brush}" />
 
-                                    <Grid Margin="0,10,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock Grid.Column="0"
-                                                   Text="{Binding SelectedWorkspace.UpdatedText}"
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource Muted2Brush}"
-                                                   VerticalAlignment="Center" />
-
-                                        <Button Grid.Column="1"
-                                                Content="Save resume"
-                                                Click="SaveResume_Click" />
-                                    </Grid>
+                                    <TextBlock Text="{Binding SelectedWorkspace.DetailsText}"
+                                               Margin="0,5,0,0"
+                                               FontSize="12"
+                                               Foreground="{StaticResource Muted2Brush}" />
                                 </StackPanel>
+
+                                <WrapPanel Grid.Column="1"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top">
+
+                                    <Button Content="▶ Run all"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Margin="0,0,8,0"
+                                            Click="RunAllActions_Click" />
+
+                                    <Button Content="Edit" />
+                                </WrapPanel>
                             </Grid>
-                        </Border>
+
+                            <!-- Resume block -->
+                            <Border Background="{StaticResource Panel2Brush}"
+                                    BorderBrush="{StaticResource Line2Brush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Margin="0,0,0,18">
+
+                                <Grid>
+                                    <Border Width="3"
+                                            HorizontalAlignment="Left"
+                                            Background="{StaticResource BlueBrush}"
+                                            CornerRadius="8,0,0,8" />
+
+                                    <StackPanel Margin="14">
+                                        <TextBlock Text="Где я остановился"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource Muted2Brush}"
+                                                   TextOptions.TextFormattingMode="Display"
+                                                   Margin="0,0,0,8" />
+
+                                        <TextBox MinHeight="78"
+                                                 FontSize="14"
+                                                 TextWrapping="Wrap"
+                                                 AcceptsReturn="True"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Text="{Binding SelectedWorkspace.ResumeText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding SelectedWorkspace.UpdatedText}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource Muted2Brush}"
+                                                       VerticalAlignment="Center" />
+
+                                            <Button Grid.Column="1"
+                                                    Content="Save resume"
+                                                    Click="SaveResume_Click" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
 
-                        <TabControl Style="{StaticResource CockpitTabControl}">
+                            <TabControl Style="{StaticResource CockpitTabControl}">
 
-                            <!-- Actions tab -->
-                            <TabItem Header="Actions">
-                                <Border Style="{StaticResource PanelBorder}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="42" />
-                                            <RowDefinition Height="*" />
-                                        </Grid.RowDefinitions>
+                                <!-- Actions tab -->
+                                <TabItem Header="Actions">
+                                    <Border Style="{StaticResource PanelBorder}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="42" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
 
-                                        <!-- Actions toolbar -->
-                                        <Border Grid.Row="0"
-                                                Background="#1D2430"
-                                                BorderBrush="{StaticResource Line2Brush}"
-                                                BorderThickness="0,0,0,1"
-                                                CornerRadius="8,8,0,0">
+                                            <!-- Actions toolbar -->
+                                            <Border Grid.Row="0"
+                                                    Background="#1D2430"
+                                                    BorderBrush="{StaticResource Line2Brush}"
+                                                    BorderThickness="0,0,0,1"
+                                                    CornerRadius="8,8,0,0">
 
-                                            <Grid Margin="14,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
+                                                <Grid Margin="14,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
 
-                                                <TextBlock Text="Actions"
-                                                           FontSize="13"
-                                                           FontWeight="Bold"
-                                                           VerticalAlignment="Center" />
+                                                    <TextBlock Text="Actions"
+                                                               FontSize="13"
+                                                               FontWeight="Bold"
+                                                               VerticalAlignment="Center" />
 
-                                                <StackPanel Grid.Column="1"
-                                                            Orientation="Horizontal"
-                                                            VerticalAlignment="Center">
+                                                    <StackPanel Grid.Column="1"
+                                                                Orientation="Horizontal"
+                                                                VerticalAlignment="Center">
 
-                                                    <Button Content="Add"
-                                                            Margin="0,0,8,0"
-                                                            Click="AddAction_Click" />
+                                                        <Button Content="Add"
+                                                                Margin="0,0,8,0"
+                                                                Click="AddAction_Click" />
 
-                                                    <Button Content="Edit"
-                                                            Margin="0,0,8,0"
-                                                            Click="EditAction_Click" />
+                                                        <Button Content="Edit"
+                                                                Margin="0,0,8,0"
+                                                                Click="EditAction_Click" />
 
-                                                    <Button Content="Delete"
-                                                            Style="{StaticResource DangerButton}"
-                                                            Margin="0,0,8,0"
-                                                            Click="DeleteAction_Click" />
+                                                        <Button Content="Delete"
+                                                                Style="{StaticResource DangerButton}"
+                                                                Margin="0,0,8,0"
+                                                                Click="DeleteAction_Click" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
 
-                                                    <Button Content="Run selected"
-                                                            Style="{StaticResource PrimaryButton}"
-                                                            Click="RunSelectedAction_Click" />
-                                                </StackPanel>
+                                            <!-- Actions list -->
+                                            <ListBox Grid.Row="1"
+                                                     Margin="14,12"
+                                                     ItemsSource="{Binding SelectedWorkspace.Actions}"
+                                                     SelectedItem="{Binding SelectedAction}">
+
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,0,0,8">
+                                                            <Border Background="{StaticResource Panel2Brush}"
+                                                                    BorderBrush="{StaticResource Line2Brush}"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="6"
+                                                                    Padding="10,9">
+
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <StackPanel Grid.Column="0">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="{Binding Name}"
+                                                                                FontSize="13"
+                                                                                FontWeight="SemiBold" />
+
+                                                                            <TextBlock Text="{Binding ActionType}"
+                                                                                Margin="10,1,0,0"
+                                                                                Style="{StaticResource ActionTypeLabel}" />
+                                                                        </StackPanel>
+
+                                                                        <TextBlock Text="{Binding Target}"
+                                                                            Margin="0,2,0,0"
+                                                                            FontFamily="Consolas"
+                                                                            FontSize="12"
+                                                                            Foreground="{StaticResource MutedBrush}"
+                                                                            TextTrimming="CharacterEllipsis" />
+
+                                                                        <TextBlock Text="{Binding LastRunText}"
+                                                                            Margin="0,3,0,0"
+                                                                            FontSize="11"
+                                                                            Foreground="{StaticResource Muted2Brush}"
+                                                                            TextTrimming="CharacterEllipsis" />
+                                                                    </StackPanel>
+
+                                                                    <Button Grid.Column="1"
+                                                                            Content="Run"
+                                                                            Tag="{Binding}"
+                                                                            Click="RunAction_Click" />
+                                                                </Grid>
+                                                            </Border>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </Grid>
+                                    </Border>
+                                </TabItem>
+
+                                <!-- Notes tab -->
+                                <TabItem Header="Notes">
+                                        <Border Style="{StaticResource PanelBorder}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="42" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Notes toolbar -->
+                                                <Border Grid.Row="0"
+                                                        Background="#1D2430"
+                                                        BorderBrush="{StaticResource Line2Brush}"
+                                                        BorderThickness="0,0,0,1"
+                                                        CornerRadius="8,8,0,0">
+
+                                                    <Grid Margin="14,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Text="Notes"
+                                                                   FontSize="13"
+                                                                   FontWeight="Bold"
+                                                                   VerticalAlignment="Center" />
+
+                                                        <StackPanel Grid.Column="1"
+                                                                    Orientation="Horizontal"
+                                                                    VerticalAlignment="Center">
+
+                                                            <Button Content="Add note"
+                                                                    Margin="0,0,8,0"
+                                                                    Click="AddNote_Click" />
+
+                                                            <Button Content="Edit"
+                                                                    Margin="0,0,8,0"
+                                                                    Click="EditNote_Click" />
+
+                                                            <Button Content="Delete"
+                                                                    Style="{StaticResource DangerButton}"
+                                                                    Click="DeleteNote_Click" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+
+                                                <!-- Notes list -->
+                                                <ListBox Grid.Row="1"
+                                                         Margin="14,12"
+                                                         ItemsSource="{Binding SelectedWorkspace.Notes}"
+                                                         SelectedItem="{Binding SelectedNote, Mode=TwoWay}">
+
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,0,0,8">
+                                                                <Border Background="{StaticResource Panel2Brush}"
+                                                                        BorderBrush="{StaticResource Line2Brush}"
+                                                                        BorderThickness="1"
+                                                                        CornerRadius="6"
+                                                                        Padding="10">
+
+                                                                    <StackPanel>
+                                                                        <StackPanel Orientation="Horizontal"
+                                                                                    Margin="0,0,0,5">
+                                                                            <TextBlock Text="{Binding Type}"
+                                                                                Style="{StaticResource NoteTypeLabel}" />
+
+                                                                            <TextBlock Text="{Binding UpdatedText}"
+                                                                                Margin="8,0,0,0"
+                                                                                Foreground="{StaticResource Muted2Brush}"
+                                                                                FontSize="12"
+                                                                                FontWeight="SemiBold" />
+                                                                        </StackPanel>
+
+                                                                        <TextBlock Text="{Binding Text}"
+                                                                            FontSize="13"
+                                                                            TextWrapping="Wrap"
+                                                                            LineHeight="20" />
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
                                             </Grid>
                                         </Border>
+                                </TabItem>
 
-                                        <!-- Actions list -->
-                                        <ListBox Grid.Row="1"
-                                                 Margin="14,12"
-                                                 ItemsSource="{Binding SelectedWorkspace.Actions}"
-                                                 SelectedItem="{Binding SelectedAction}">
+                                <!-- Log tab -->
+                                <TabItem Header="Log">
+                                    <Border Background="#0C1118"
+                                            BorderBrush="{StaticResource Line2Brush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="10">
 
+                                        <ListBox ItemsSource="{Binding ActionRuns}">
                                             <ListBox.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid Margin="0,0,0,8">
-                                                        <Border Background="{StaticResource Panel2Brush}"
-                                                                BorderBrush="{StaticResource Line2Brush}"
-                                                                BorderThickness="1"
-                                                                CornerRadius="6"
-                                                                Padding="10,9">
-
+                                                    <Border Background="{StaticResource Panel2Brush}"
+                                                            BorderBrush="{StaticResource Line2Brush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="10"
+                                                            Margin="0,0,0,8">
+                                                        <StackPanel>
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*" />
@@ -354,200 +502,57 @@
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <StackPanel Grid.Column="0">
-                                                                    <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock Text="{Binding Name}"
-                                                                                   FontSize="13"
-                                                                                   FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding ActionNameSnapshot}"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold" />
 
-                                                                        <TextBlock Text="{Binding ActionType}"
-                                                                                   Margin="10,1,0,0"
-                                                                                   Foreground="{StaticResource BlueBrush}"
-                                                                                   FontSize="11"
-                                                                                   FontWeight="SemiBold" />
-                                                                    </StackPanel>
-
-                                                                    <TextBlock Text="{Binding Target}"
+                                                                    <TextBlock Text="{Binding TargetSnapshot}"
                                                                                Margin="0,2,0,0"
                                                                                FontFamily="Consolas"
                                                                                FontSize="12"
                                                                                Foreground="{StaticResource MutedBrush}"
                                                                                TextTrimming="CharacterEllipsis" />
-
-                                                                    <TextBlock Text="{Binding LastRunText}"
-                                                                               Margin="0,3,0,0"
-                                                                               FontSize="11"
-                                                                               Foreground="{StaticResource Muted2Brush}"
-                                                                               TextTrimming="CharacterEllipsis" />
                                                                 </StackPanel>
 
-                                                                <Button Grid.Column="1"
-                                                                        Content="Run"
-                                                                        Tag="{Binding}"
-                                                                        Click="RunAction_Click" />
-                                                            </Grid>
-                                                        </Border>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-                                    </Grid>
-                                </Border>
-                            </TabItem>
-
-                            <!-- Notes tab -->
-                            <TabItem Header="Notes">
-                                <Border Style="{StaticResource PanelBorder}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="42" />
-                                            <RowDefinition Height="*" />
-                                        </Grid.RowDefinitions>
-
-                                        <!-- Notes toolbar -->
-                                        <Border Grid.Row="0"
-                                                Background="#1D2430"
-                                                BorderBrush="{StaticResource Line2Brush}"
-                                                BorderThickness="0,0,0,1"
-                                                CornerRadius="8,8,0,0">
-
-                                            <Grid Margin="14,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <TextBlock Text="Notes"
-                                                           FontSize="13"
-                                                           FontWeight="Bold"
-                                                           VerticalAlignment="Center" />
-
-                                                <StackPanel Grid.Column="1"
-                                                            Orientation="Horizontal"
-                                                            VerticalAlignment="Center">
-
-                                                    <Button Content="Add note"
-                                                            Margin="0,0,8,0"
-                                                            Click="AddNote_Click" />
-
-                                                    <Button Content="Delete"
-                                                            Style="{StaticResource DangerButton}"
-                                                            Click="DeleteNote_Click" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- Notes list -->
-                                        <ListBox Grid.Row="1"
-                                                 Margin="14,12"
-                                                 ItemsSource="{Binding SelectedWorkspace.Notes}"
-                                                 SelectedItem="{Binding SelectedNote, Mode=TwoWay}">
-
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="0,0,0,8">
-                                                        <Border Background="{StaticResource Panel2Brush}"
-                                                                BorderBrush="{StaticResource Line2Brush}"
-                                                                BorderThickness="1"
-                                                                CornerRadius="6"
-                                                                Padding="10">
-
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding Header}"
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding Status}"
                                                                            Foreground="{StaticResource BlueBrush}"
                                                                            FontSize="12"
                                                                            FontWeight="SemiBold"
-                                                                           Margin="0,0,0,5" />
+                                                                           Margin="12,0,0,0" />
+                                                            </Grid>
 
-                                                                <TextBlock Text="{Binding Text}"
-                                                                           FontSize="13"
-                                                                           TextWrapping="Wrap"
-                                                                           LineHeight="20" />
+                                                            <StackPanel Orientation="Horizontal"
+                                                                        Margin="0,6,0,0">
+                                                                <TextBlock Text="{Binding StartedText}"
+                                                                           FontSize="11"
+                                                                           Foreground="{StaticResource Muted2Brush}" />
+
+                                                                <TextBlock Text="{Binding DurationText}"
+                                                                           Margin="12,0,0,0"
+                                                                           FontSize="11"
+                                                                           Foreground="{StaticResource Muted2Brush}" />
+
+                                                                <TextBlock Text="{Binding ExitCodeText}"
+                                                                           Margin="12,0,0,0"
+                                                                           FontSize="11"
+                                                                           Foreground="{StaticResource Muted2Brush}" />
                                                             </StackPanel>
-                                                        </Border>
-                                                    </Grid>
+
+                                                            <TextBlock Text="{Binding ErrorMessage}"
+                                                                       Margin="0,6,0,0"
+                                                                       Foreground="{StaticResource RedBrush}"
+                                                                       FontSize="12"
+                                                                       TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                    </Border>
                                                 </DataTemplate>
                                             </ListBox.ItemTemplate>
                                         </ListBox>
-                                    </Grid>
-                                </Border>
-                            </TabItem>
+                                    </Border>
+                                </TabItem>
 
-                            <!-- Log tab -->
-                            <TabItem Header="Log">
-                                <Border Background="#0C1118"
-                                        BorderBrush="{StaticResource Line2Brush}"
-                                        BorderThickness="1"
-                                        CornerRadius="6"
-                                        Padding="10">
-
-                                    <ListBox ItemsSource="{Binding ActionRuns}">
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="{StaticResource Panel2Brush}"
-                                                        BorderBrush="{StaticResource Line2Brush}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="6"
-                                                        Padding="10"
-                                                        Margin="0,0,0,8">
-                                                    <StackPanel>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <StackPanel Grid.Column="0">
-                                                                <TextBlock Text="{Binding ActionNameSnapshot}"
-                                                                           FontSize="13"
-                                                                           FontWeight="SemiBold" />
-
-                                                                <TextBlock Text="{Binding TargetSnapshot}"
-                                                                           Margin="0,2,0,0"
-                                                                           FontFamily="Consolas"
-                                                                           FontSize="12"
-                                                                           Foreground="{StaticResource MutedBrush}"
-                                                                           TextTrimming="CharacterEllipsis" />
-                                                            </StackPanel>
-
-                                                            <TextBlock Grid.Column="1"
-                                                                       Text="{Binding Status}"
-                                                                       Foreground="{StaticResource BlueBrush}"
-                                                                       FontSize="12"
-                                                                       FontWeight="SemiBold"
-                                                                       Margin="12,0,0,0" />
-                                                        </Grid>
-
-                                                        <StackPanel Orientation="Horizontal"
-                                                                    Margin="0,6,0,0">
-                                                            <TextBlock Text="{Binding StartedText}"
-                                                                       FontSize="11"
-                                                                       Foreground="{StaticResource Muted2Brush}" />
-
-                                                            <TextBlock Text="{Binding DurationText}"
-                                                                       Margin="12,0,0,0"
-                                                                       FontSize="11"
-                                                                       Foreground="{StaticResource Muted2Brush}" />
-
-                                                            <TextBlock Text="{Binding ExitCodeText}"
-                                                                       Margin="12,0,0,0"
-                                                                       FontSize="11"
-                                                                       Foreground="{StaticResource Muted2Brush}" />
-                                                        </StackPanel>
-
-                                                        <TextBlock Text="{Binding ErrorMessage}"
-                                                                   Margin="0,6,0,0"
-                                                                   Foreground="{StaticResource RedBrush}"
-                                                                   FontSize="12"
-                                                                   TextWrapping="Wrap" />
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                </Border>
-                            </TabItem>
-
-                        </TabControl>
+                            </TabControl>
                         </StackPanel>
                     </ScrollViewer>
 
@@ -574,12 +579,13 @@
                                        HorizontalAlignment="Center"
                                        TextAlignment="Center" />
 
-                            <TextBlock Text="Создай workspace или выбери его в sidebar, чтобы открыть заметки, действия и лог запусков."
-                                       Margin="0,8,0,0"
-                                       FontSize="13"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
+                            <TextBlock
+                                Text="Создай workspace или выбери его в sidebar, чтобы открыть заметки, действия и лог запусков."
+                                Margin="0,8,0,0"
+                                FontSize="13"
+                                Foreground="{StaticResource MutedBrush}"
+                                TextAlignment="Center"
+                                TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
                 </Grid>

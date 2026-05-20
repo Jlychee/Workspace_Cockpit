@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Models;
 using Models.Entities;
 
 namespace Infrastructure.Data;
@@ -85,6 +84,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         note.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc").IsRequired();
 
         note.Ignore(x => x.Header);
+        note.Ignore(x => x.UpdatedText);
 
         note.HasIndex(x => x.WorkspaceId).HasDatabaseName("ix_workspace_notes_workspace_id");
         note.HasIndex(x => x.UpdatedAtUtc).HasDatabaseName("ix_workspace_notes_updated_at_utc");

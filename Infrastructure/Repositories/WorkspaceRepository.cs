@@ -1,6 +1,5 @@
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Models;
 using Models.Entities;
 
 namespace Infrastructure.Repositories;
@@ -127,6 +126,24 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         existing.UpdatedAtUtc = now;
 
         action.UpdatedAtUtc = now;
+        await TouchWorkspaceAsync(dbContext, existing.WorkspaceId, now);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateNoteAsync(WorkspaceNote note)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var existing = await dbContext.WorkspaceNotes.FindAsync(note.Id);
+
+        if (existing is null)
+            return;
+
+        var now = DateTime.UtcNow;
+        existing.Text = note.Text;
+        existing.Type = note.Type;
+        existing.UpdatedAtUtc = now;
+
+        note.UpdatedAtUtc = now;
         await TouchWorkspaceAsync(dbContext, existing.WorkspaceId, now);
         await dbContext.SaveChangesAsync();
     }

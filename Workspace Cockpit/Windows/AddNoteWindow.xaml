@@ -4,10 +4,11 @@
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Add note"
         Width="440"
-        Height="390"
+        Height="420"
         MinWidth="440"
-        MinHeight="390"
+        MinHeight="420"
         WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
         ResizeMode="NoResize"
         Background="{StaticResource WindowBrush}"
         Foreground="{StaticResource TextBrush}"
@@ -22,77 +23,142 @@
 
     <Border Background="{StaticResource WindowBrush}"
             BorderBrush="{StaticResource LineBrush}"
-            BorderThickness="1"
-            Padding="16">
+            BorderThickness="1">
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="16" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="8" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="14" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="8" />
+                <RowDefinition Height="42" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="16" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Title -->
-            <StackPanel Grid.Row="0">
-                <TextBlock Text="Новая заметка"
-                           FontSize="18"
-                           FontWeight="Bold" />
+            <!-- Titlebar -->
+            <Border Grid.Row="0"
+                    Background="#0D1117"
+                    BorderBrush="{StaticResource Line2Brush}"
+                    BorderThickness="0,0,0,1">
 
-                <TextBlock Text="Запиши мысль, напоминание или текущий контекст по workspace."
-                           Margin="0,4,0,0"
-                           FontSize="12"
-                           Foreground="{StaticResource MutedBrush}"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-            <!-- Type -->
-            <TextBlock Grid.Row="2"
-                       Text="Тип заметки"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource MutedBrush}" />
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="14,0,0,0">
 
-            <ComboBox x:Name="NoteTypeComboBox"
-                      Grid.Row="4"
-                      Height="34"
-                      Padding="8,4" />
+                        <TextBlock Text="📝"
+                                   FontSize="13"
+                                   Margin="0,0,8,0" />
 
-            <!-- Label -->
-            <TextBlock Grid.Row="6"
-                       Text="Текст заметки"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource MutedBrush}" />
+                        <TextBlock x:Name="WindowTitleTextBlock"
+                                   Text="Add note"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}" />
+                    </StackPanel>
 
-            <!-- Text input -->
-            <TextBox x:Name="NoteTextBox"
-                     Grid.Row="8"
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True"
-                     VerticalScrollBarVisibility="Auto"
-                     VerticalContentAlignment="Top" />
+                    <Button Grid.Column="1"
+                            Content="×"
+                            Style="{StaticResource CloseTitleBarButton}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            FontSize="18"
+                            Click="Close_Click" />
+                </Grid>
+            </Border>
 
-            <!-- Buttons -->
-            <StackPanel Grid.Row="10"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+            <!-- Content -->
+            <Grid Grid.Row="1">
 
-                <Button Content="Cancel"
-                        Margin="0,0,8,0"
-                        Click="Cancel_Click" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <Button Content="Save"
-                        Style="{StaticResource PrimaryButton}"
-                        Click="Save_Click" />
-            </StackPanel>
+                <!-- Form -->
+                <Grid Grid.Row="0"
+                      Margin="16,16,16,18">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0">
+
+                        <TextBlock x:Name="HeaderTitleTextBlock"
+                                   Text="Новая заметка"
+                                   FontSize="18"
+                                   FontWeight="Bold" />
+
+                        <TextBlock x:Name="HeaderDescriptionTextBlock"
+                                   Text="Запиши мысль, напоминание или текущий контекст по workspace."
+                                   Margin="0,4,0,0"
+                                   FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Type -->
+                    <StackPanel Grid.Row="2">
+
+                        <TextBlock Text="Тип заметки"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,5" />
+
+                        <ComboBox x:Name="NoteTypeComboBox"
+                                  Height="34"
+                                  Padding="8,4" />
+                    </StackPanel>
+
+                    <!-- Text -->
+                    <StackPanel Grid.Row="4">
+
+                        <TextBlock Text="Текст заметки"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,0,0,5" />
+
+                        <TextBox x:Name="NoteTextBox"
+                                 Height="220"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalContentAlignment="Top"
+                                 VerticalScrollBarVisibility="Auto" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Footer -->
+                <Border Grid.Row="1"
+                        Padding="12,10"
+                        Background="#151B24"
+                        BorderBrush="{StaticResource Line2Brush}"
+                        BorderThickness="0,1,0,0">
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+
+                        <Button Content="Cancel"
+                                Margin="0,0,8,0"
+                                Click="Cancel_Click" />
+
+                        <Button x:Name="SaveButton"
+                                Content="Save"
+                                Style="{StaticResource PrimaryButton}"
+                                Click="Save_Click" />
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
     </Border>
 </Window>

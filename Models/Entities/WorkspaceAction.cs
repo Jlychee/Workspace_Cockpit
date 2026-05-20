@@ -14,7 +14,7 @@ public class WorkspaceAction : INotifyPropertyChanged
     public string Target { get; set; } = "";
     public string WorkingDirectory { get; set; } = "";
     public WorkspaceActionType ActionType { get; set; } = WorkspaceActionType.Command;
-
+    
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastRunAtUtc { get; set; }
