@@ -205,4 +205,28 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         if (workspace is not null)
             workspace.UpdatedAtUtc = updatedAtUtc;
     }
+    
+    public async Task DeleteActionRunAsync(WorkspaceActionRun action)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var existing = await dbContext.ActionRuns.FindAsync(action.Id);
+        
+        if (existing is null)
+            return;
+        
+        dbContext.ActionRuns.Remove(existing);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task ClearActionRunsAsync(int workspaceId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var runs = dbContext.ActionRuns
+            .Where(x => x.WorkspaceId == workspaceId);
+        
+        dbContext.ActionRuns.RemoveRange(runs);
+        await dbContext.SaveChangesAsync();
+    }
 }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using Infrastructure.Repositories;
 using Models.Entities;
 using Models.Enums;
@@ -312,7 +313,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         await RunProcessAsync(process, run);
     }
-    
+
 
     private static async Task RunProcessAsync(Process process, WorkspaceActionRun run)
     {
@@ -337,6 +338,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OpenFileAction(WorkspaceAction action, WorkspaceActionRun run)
     {
+        
+        
         var filePath = ResolveActionPath(action);
         if (!File.Exists(filePath))
             throw new FileNotFoundException("File was not found.", filePath);
@@ -421,8 +424,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             UseShellExecute = true
         };
 
-        if (Process.Start(startInfo) is null)
-            throw new InvalidOperationException("Shell action was not started.");
+        Process.Start(startInfo);
     }
 
     private static string ToPreview(string value)
@@ -588,5 +590,38 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             AppMessageBox.Show(this, "Edit note error", ex.Message);
         }
+    }
+
+    // TODO: костыль...
+    private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        e.Handled = true;
+
+        var eventArg = new MouseWheelEventArgs(
+            e.MouseDevice,
+            e.Timestamp,
+            e.Delta)
+        {
+            RoutedEvent = MouseWheelEvent,
+            Source = sender
+        };
+
+        MainScrollViewer.RaiseEvent(eventArg);
+    }
+
+    private async void ClearLog_Click(object sender, RoutedEventArgs e)
+    {
+        await repository.ClearActionRunsAsync(SelectedWorkspace.Id);
+        ActionRuns.Clear();
+    }
+
+    private async void RemoveSelectedLog_Click(object sender, RoutedEventArgs e)
+    {
+        if (LogList.SelectedItem is WorkspaceActionRun selected)
+        {
+            await repository.DeleteActionRunAsync(selected);
+            ActionRuns.Remove(selected);
+        }
+        
     }
 }

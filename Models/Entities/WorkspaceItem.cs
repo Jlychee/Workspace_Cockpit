@@ -15,7 +15,7 @@ public class WorkspaceItem : INotifyPropertyChanged
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastOpenedAtUtc { get; set; }
 
-    public string Meta => $"{UpdatedText} · {Actions.Count} actions · {Notes.Count} notes";
+    public string Meta => $"{UpdatedText}";
 
     public string CreatedText =>
         $"Created {CreatedAtUtc.ToLocalTime():dd.MM.yyyy HH:mm}";
