@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Infrastructure.Repositories;
 using Models.Entities;
@@ -312,7 +314,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            
+            StandardOutputEncoding = Encoding.GetEncoding(866),
+            StandardErrorEncoding = Encoding.GetEncoding(866)
         };
 
         await RunProcessAsync(process, run);
@@ -527,6 +532,27 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
+    private async void DeleteWorkspace_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null)
+            return;
+
+        var workspace = SelectedWorkspace;
+        
+        try
+        {
+            await workspaceRepository.DeleteWorkspaceAsync(workspace);
+
+            Workspaces.Remove(workspace);
+
+            SelectedWorkspace = Workspaces.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            AppMessageBox.Show(this, "Delete workspace error", ex.Message);
+        }
+    }
+
     private async void NewWorkspace_Click(object sender, RoutedEventArgs e)
     {
         var window = new AddWorkspaceWindow()
@@ -595,6 +621,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     }
 
     // TODO: костыль...
+
     private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
         e.Handled = true;
@@ -624,5 +651,42 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             await logRepository.DeleteLogAsync(selected);
             ActionRuns.Remove(selected);
         }
+    }
+
+    private async void EditWorkspace_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedWorkspace is null)
+            return;
+        
+        var window = new AddWorkspaceWindow(SelectedWorkspace)
+        {
+            Owner = this
+        };
+
+        if (window.ShowDialog() != true)
+            return;
+
+        try
+        {
+            await workspaceRepository.UpdateWorkspaceAsync(window.ResultWorkspace);
+
+            SelectedWorkspace.NotifyDisplayChanged();
+            OnPropertyChanged(nameof(SelectedWorkspace));
+        }
+        catch (Exception ex)
+        {
+            AppMessageBox.Show(this, "Edit workspace error", ex.Message);
+        }
+    }
+
+    private void CopyError_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string errorText })
+            return;
+
+        if (string.IsNullOrWhiteSpace(errorText))
+            return;
+
+        Clipboard.SetText(errorText);
     }
 }

@@ -11,6 +11,11 @@ public partial class App : Application
 {
     private ServiceProvider? serviceProvider;
 
+    public App()
+    {
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+    }
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
