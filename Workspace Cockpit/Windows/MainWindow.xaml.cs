@@ -9,19 +9,21 @@ using Infrastructure.Repositories;
 using Models.Entities;
 using Models.Enums;
 using Workspace_Cockpit.Helpers;
-using Workspace_Cockpit.Windows;
 
-namespace Workspace_Cockpit;
+namespace Workspace_Cockpit.Windows;
 
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
-    private readonly WorkspaceRepository repository;
+    private readonly WorkspaceRepository workspaceRepository;
+    private readonly WorkspaceNoteRepository noteRepository;
+    private readonly WorkspaceActionRepository actionRepository;
+    private readonly WorkspaceLogRepository logRepository;
     private WorkspaceItem? selectedWorkspace;
     private WorkspaceAction? selectedAction;
     private WorkspaceNote? selectedNote;
 
     public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
-    public ObservableCollection<WorkspaceActionRun> ActionRuns { get; } = [];
+    public ObservableCollection<WorkspaceLog> ActionRuns { get; } = [];
 
     public WorkspaceItem? SelectedWorkspace
     {
@@ -62,9 +64,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public MainWindow(WorkspaceRepository repository)
+    public MainWindow(WorkspaceRepository repository, WorkspaceRepository workspaceRepository,
+        WorkspaceNoteRepository noteRepository, WorkspaceActionRepository actionRepository,
+        WorkspaceLogRepository logRepository)
     {
-        this.repository = repository;
+        this.workspaceRepository = workspaceRepository;
+        this.noteRepository = noteRepository;
+        this.actionRepository = actionRepository;
+        this.logRepository = logRepository;
         InitializeComponent();
         DataContext = this;
         Loaded += MainWindow_Loaded;
@@ -84,7 +91,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async Task LoadWorkspacesAsync()
     {
-        var workspaces = await repository.LoadWorkspacesAsync();
+        var workspaces = await workspaceRepository.LoadWorkspacesAsync();
 
         Workspaces.Clear();
         foreach (var workspace in workspaces)
@@ -109,8 +116,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (workspace.Id > 0)
             {
-                await repository.UpdateWorkspaceLastOpenedAsync(workspace.Id, now);
-                await ReloadActionRunsAsync(workspace.Id);
+                await workspaceRepository.UpdateWorkspaceLastOpenedAsync(workspace.Id, now);
+                await ReloadLogsAsync(workspace.Id);
             }
         }
         catch (Exception ex)
@@ -119,9 +126,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private async Task ReloadActionRunsAsync(int workspaceId)
+    private async Task ReloadLogsAsync(int workspaceId)
     {
-        var runs = await repository.LoadActionRunsAsync(workspaceId);
+        var runs = await logRepository.LoadLogsAsync(workspaceId);
 
         ActionRuns.Clear();
         foreach (var run in runs)
@@ -157,7 +164,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await repository.UpdateWorkspaceAsync(SelectedWorkspace);
+            await workspaceRepository.UpdateWorkspaceAsync(SelectedWorkspace);
             SelectedWorkspace.NotifyDisplayChanged();
             OnPropertyChanged(nameof(SelectedWorkspace));
         }
@@ -175,7 +182,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var note = SelectedNote;
-            await repository.DeleteNoteAsync(note);
+            await noteRepository.DeleteNoteAsync(note);
             SelectedWorkspace.Notes.Remove(note);
             TouchSelectedWorkspace();
         }
@@ -197,7 +204,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await repository.AddNoteAsync(SelectedWorkspace.Id, window.ResultNote);
+            await noteRepository.AddNoteAsync(SelectedWorkspace.Id, window.ResultNote);
             SelectedWorkspace.Notes.Add(window.ResultNote);
             TouchSelectedWorkspace(window.ResultNote.UpdatedAtUtc);
         }
@@ -230,7 +237,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var run = await ExecuteActionAsync(action);
-            await repository.AddActionRunAsync(action, run);
+            await logRepository.AddLogAsync(action, run);
 
             action.NotifyDisplayChanged();
             SelectedWorkspace.NotifyDisplayChanged();
@@ -243,9 +250,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private async Task<WorkspaceActionRun> ExecuteActionAsync(WorkspaceAction action)
+    private async Task<WorkspaceLog> ExecuteActionAsync(WorkspaceAction action)
     {
-        var run = new WorkspaceActionRun
+        var run = new WorkspaceLog
         {
             WorkspaceId = action.WorkspaceId,
             WorkspaceActionId = action.Id,
@@ -297,7 +304,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private async Task RunCommandAsync(WorkspaceAction action, WorkspaceActionRun run)
+    private async Task RunCommandAsync(WorkspaceAction action, WorkspaceLog run)
     {
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
@@ -315,7 +322,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     }
 
 
-    private static async Task RunProcessAsync(Process process, WorkspaceActionRun run)
+    private static async Task RunProcessAsync(Process process, WorkspaceLog run)
     {
         if (!process.Start())
             throw new InvalidOperationException("Process was not started.");
@@ -336,10 +343,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             : ToErrorMessage(process.ExitCode, error);
     }
 
-    private void OpenFileAction(WorkspaceAction action, WorkspaceActionRun run)
+    private void OpenFileAction(WorkspaceAction action, WorkspaceLog run)
     {
-        
-        
         var filePath = ResolveActionPath(action);
         if (!File.Exists(filePath))
             throw new FileNotFoundException("File was not found.", filePath);
@@ -349,7 +354,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         run.OutputPreview = $"Opened file: {filePath}";
     }
 
-    private void OpenFolderAction(WorkspaceAction action, WorkspaceActionRun run)
+    private void OpenFolderAction(WorkspaceAction action, WorkspaceLog run)
     {
         var folderPath = ResolveActionPath(action);
         if (!Directory.Exists(folderPath))
@@ -360,7 +365,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         run.OutputPreview = $"Opened folder: {folderPath}";
     }
 
-    private static void OpenUrlAction(WorkspaceAction action, WorkspaceActionRun run)
+    private static void OpenUrlAction(WorkspaceAction action, WorkspaceLog run)
     {
         var uri = ResolveHttpUri(action.Target);
 
@@ -469,7 +474,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             SelectedAction.ActionType = updatedAction.ActionType;
             SelectedAction.UpdatedAtUtc = updatedAction.UpdatedAtUtc;
 
-            await repository.UpdateActionAsync(SelectedAction);
+            await actionRepository.UpdateActionAsync(SelectedAction);
 
             SelectedAction.NotifyDisplayChanged();
             TouchSelectedWorkspace(SelectedAction.UpdatedAtUtc);
@@ -488,9 +493,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             var action = SelectedAction;
-            await repository.DeleteActionAsync(action);
+            await actionRepository.DeleteActionAsync(action);
             SelectedWorkspace.Actions.Remove(action);
-            await ReloadActionRunsAsync(SelectedWorkspace.Id);
+            await ReloadLogsAsync(SelectedWorkspace.Id);
             TouchSelectedWorkspace();
         }
         catch (Exception ex)
@@ -514,7 +519,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await repository.AddActionAsync(SelectedWorkspace.Id, window.ResultAction);
+            await actionRepository.AddActionAsync(SelectedWorkspace.Id, window.ResultAction);
             SelectedWorkspace.Actions.Add(window.ResultAction);
             SelectedAction = window.ResultAction;
             TouchSelectedWorkspace(window.ResultAction.UpdatedAtUtc);
@@ -537,7 +542,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            await repository.AddWorkspaceAsync(window.ResultWorkspace);
+            await workspaceRepository.AddWorkspaceAsync(window.ResultWorkspace);
             Workspaces.Add(window.ResultWorkspace);
             SelectedWorkspace = window.ResultWorkspace;
         }
@@ -581,7 +586,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             SelectedNote.Type = updatedNote.Type;
             SelectedNote.UpdatedAtUtc = updatedNote.UpdatedAtUtc;
 
-            await repository.UpdateNoteAsync(SelectedNote);
+            await noteRepository.UpdateNoteAsync(SelectedNote);
 
             SelectedNote.NotifyDisplayChanged();
             TouchSelectedWorkspace(SelectedNote.UpdatedAtUtc);
@@ -611,17 +616,16 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async void ClearLog_Click(object sender, RoutedEventArgs e)
     {
-        await repository.ClearActionRunsAsync(SelectedWorkspace.Id);
+        await logRepository.ClearLogsAsync(SelectedWorkspace.Id);
         ActionRuns.Clear();
     }
 
     private async void RemoveSelectedLog_Click(object sender, RoutedEventArgs e)
     {
-        if (LogList.SelectedItem is WorkspaceActionRun selected)
+        if (LogList.SelectedItem is WorkspaceLog selected)
         {
-            await repository.DeleteActionRunAsync(selected);
+            await logRepository.DeleteLogAsync(selected);
             ActionRuns.Remove(selected);
         }
-        
     }
 }

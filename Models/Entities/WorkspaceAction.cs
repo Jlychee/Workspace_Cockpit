@@ -24,7 +24,7 @@ public class WorkspaceAction : INotifyPropertyChanged
             ? "Never run"
             : $"Last run {LastRunAtUtc.Value.ToLocalTime():dd.MM.yyyy HH:mm}";
 
-    public ObservableCollection<WorkspaceActionRun> ActionRuns { get; set; } = [];
+    public ObservableCollection<WorkspaceLog> ActionRuns { get; set; } = [];
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
