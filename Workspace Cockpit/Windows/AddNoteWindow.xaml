@@ -31,7 +31,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Titlebar -->
+            <!-- TITLEBAR -->
             <Border Grid.Row="0"
                     Background="#0D1117"
                     BorderBrush="{StaticResource Line2Brush}"
@@ -68,7 +68,7 @@
                 </Grid>
             </Border>
 
-            <!-- Content -->
+            <!-- CONTENT AREA -->
             <Grid Grid.Row="1">
 
                 <Grid.RowDefinitions>
@@ -76,69 +76,70 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- Form -->
-                <Grid Grid.Row="0"
-                      Margin="16,16,16,18">
+                <!-- SCROLLABLE CONTENT -->
+                <ScrollViewer Grid.Row="0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="16" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
+                    <Grid Margin="16,16,16,18">
 
-                    <!-- Header -->
-                    <StackPanel Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="16" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <TextBlock x:Name="HeaderTitleTextBlock"
-                                   Text="Новая заметка"
-                                   FontSize="18"
-                                   FontWeight="Bold" />
+                        <!-- HEADER -->
+                        <StackPanel Grid.Row="0">
+                            <TextBlock x:Name="HeaderTitleTextBlock"
+                                       Text="Новая заметка"
+                                       FontSize="18"
+                                       FontWeight="Bold" />
 
-                        <TextBlock x:Name="HeaderDescriptionTextBlock"
-                                   Text="Запиши мысль, напоминание или текущий контекст по workspace."
-                                   Margin="0,4,0,0"
-                                   FontSize="12"
-                                   Foreground="{StaticResource MutedBrush}"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
+                            <TextBlock x:Name="HeaderDescriptionTextBlock"
+                                       Text="Запиши мысль, напоминание или текущий контекст по workspace."
+                                       Margin="0,4,0,0"
+                                       FontSize="12"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
 
-                    <!-- Type -->
-                    <StackPanel Grid.Row="2">
+                        <!-- TYPE -->
+                        <StackPanel Grid.Row="2">
+                            <TextBlock Text="Тип заметки"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,0,0,5" />
 
-                        <TextBlock Text="Тип заметки"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource MutedBrush}"
-                                   Margin="0,0,0,5" />
+                            <ComboBox x:Name="NoteTypeComboBox"
+                                      Height="34"
+                                      Padding="8,4" />
+                        </StackPanel>
 
-                        <ComboBox x:Name="NoteTypeComboBox"
-                                  Height="34"
-                                  Padding="8,4" />
-                    </StackPanel>
+                        <!-- TEXT -->
+                        <StackPanel Grid.Row="4">
+                            <TextBlock Text="Текст заметки"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,0,0,5" />
 
-                    <!-- Text -->
-                    <StackPanel Grid.Row="4">
+                            <TextBox x:Name="NoteTextBox"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalContentAlignment="Top"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     MinHeight="120" />
+                        </StackPanel>
 
-                        <TextBlock Text="Текст заметки"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource MutedBrush}"
-                                   Margin="0,0,0,5" />
+                    </Grid>
+                </ScrollViewer>
 
-                        <TextBox x:Name="NoteTextBox"
-                                 Height="220"
-                                 TextWrapping="Wrap"
-                                 AcceptsReturn="True"
-                                 VerticalContentAlignment="Top"
-                                 VerticalScrollBarVisibility="Auto" />
-                    </StackPanel>
-                </Grid>
-
-                <!-- Footer -->
+                <!-- FOOTER (FIXED) -->
                 <Border Grid.Row="1"
                         Padding="12,10"
                         Background="#151B24"
@@ -156,8 +157,10 @@
                                 Content="Save"
                                 Style="{StaticResource PrimaryButton}"
                                 Click="Save_Click" />
+
                     </StackPanel>
                 </Border>
+
             </Grid>
         </Grid>
     </Border>
