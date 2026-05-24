@@ -1,6 +1,6 @@
 namespace Models.Entities;
 
-public class WorkspaceActionRun
+public class WorkspaceLog
 {
     public int Id { get; set; }
 

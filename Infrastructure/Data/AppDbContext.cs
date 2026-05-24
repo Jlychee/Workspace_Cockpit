@@ -9,7 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<WorkspaceItem> Workspaces => Set<WorkspaceItem>();
     public DbSet<WorkspaceNote> WorkspaceNotes => Set<WorkspaceNote>();
     public DbSet<WorkspaceAction> WorkspaceActions => Set<WorkspaceAction>();
-    public DbSet<WorkspaceActionRun> ActionRuns => Set<WorkspaceActionRun>();
+    public DbSet<WorkspaceLog> ActionRuns => Set<WorkspaceLog>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -17,14 +17,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureWorkspaces(modelBuilder.Entity<WorkspaceItem>());
         ConfigureWorkspaceNotes(modelBuilder.Entity<WorkspaceNote>());
         ConfigureWorkspaceActions(modelBuilder.Entity<WorkspaceAction>());
-        ConfigureActionRuns(modelBuilder.Entity<WorkspaceActionRun>());
+        ConfigureActionRuns(modelBuilder.Entity<WorkspaceLog>());
         ConfigureAppSettings(modelBuilder.Entity<AppSetting>());
     }
 
     private static void ConfigureWorkspaces(EntityTypeBuilder<WorkspaceItem> workspace)
     {
         workspace.ToTable("workspaces");
-        
+
         workspace.HasKey(x => x.Id);
 
         workspace.Property(x => x.Id)
@@ -120,7 +120,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         action.HasIndex(x => x.UpdatedAtUtc).HasDatabaseName("ix_workspace_actions_updated_at_utc");
     }
 
-    private static void ConfigureActionRuns(EntityTypeBuilder<WorkspaceActionRun> run)
+    private static void ConfigureActionRuns(EntityTypeBuilder<WorkspaceLog> run)
     {
         run.ToTable("action_runs");
         run.HasKey(x => x.Id);

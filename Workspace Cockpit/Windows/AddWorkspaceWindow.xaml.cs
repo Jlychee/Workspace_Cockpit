@@ -9,10 +9,24 @@ namespace Workspace_Cockpit.Windows;
 public partial class AddWorkspaceWindow : Window
 {
     public WorkspaceItem ResultWorkspace { get; private set; } = new();
+    private readonly WorkspaceItem? sourceWorkspace;
+
 
     public AddWorkspaceWindow()
     {
         InitializeComponent();
+    }
+    
+    public AddWorkspaceWindow(WorkspaceItem? workspace) : this()
+    {
+        sourceWorkspace = workspace;
+
+        if (workspace is null)
+            return;
+
+        WindowTitleTextBlock.Text = "Edit workspace";
+        NameTextBox.Text = workspace.Name;
+        RootPathTextBox.Text = workspace.RootPath;
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -22,13 +36,23 @@ public partial class AddWorkspaceWindow : Window
             AppMessageBox.Show(this, "Предупреждение", "Введите название workspace.");
             return;
         }
-
-        ResultWorkspace = new WorkspaceItem
+        
+        if (sourceWorkspace is not null)
         {
-            Name = NameTextBox.Text.Trim(),
-            RootPath = RootPathTextBox.Text.Trim(),
-            ResumeText = "",
-        };
+            sourceWorkspace.Name = NameTextBox.Text.Trim();
+            sourceWorkspace.RootPath = RootPathTextBox.Text.Trim();
+
+            ResultWorkspace = sourceWorkspace;
+        }
+        else
+        {
+            ResultWorkspace = new WorkspaceItem
+            {
+                Name = NameTextBox.Text.Trim(),
+                RootPath = RootPathTextBox.Text.Trim(),
+                ResumeText = "",
+            };
+        }
 
         DialogResult = true;
         Close();

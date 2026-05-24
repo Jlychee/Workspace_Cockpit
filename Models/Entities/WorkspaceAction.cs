@@ -14,7 +14,7 @@ public class WorkspaceAction : INotifyPropertyChanged
     public string Target { get; set; } = "";
     public string WorkingDirectory { get; set; } = "";
     public WorkspaceActionType ActionType { get; set; } = WorkspaceActionType.Command;
-    
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastRunAtUtc { get; set; }
@@ -24,7 +24,7 @@ public class WorkspaceAction : INotifyPropertyChanged
             ? "Never run"
             : $"Last run {LastRunAtUtc.Value.ToLocalTime():dd.MM.yyyy HH:mm}";
 
-    public ObservableCollection<WorkspaceActionRun> ActionRuns { get; set; } = [];
+    public ObservableCollection<WorkspaceLog> ActionRuns { get; set; } = [];
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

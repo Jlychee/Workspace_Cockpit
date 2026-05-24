@@ -1,5 +1,6 @@
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,13 @@ public static class DependencyInjection
             options.UseSqlite(DbPathProvider.GetConnectionString()));
 
         services.AddSingleton<DatabaseInitializer>();
+
         services.AddSingleton<WorkspaceRepository>();
+        services.AddSingleton<WorkspaceActionRepository>();
+        services.AddSingleton<WorkspaceNoteRepository>();
+        services.AddSingleton<WorkspaceLogRepository>();
+
+        services.AddScoped<WorkspaceTimestampService>();
 
         return services;
     }

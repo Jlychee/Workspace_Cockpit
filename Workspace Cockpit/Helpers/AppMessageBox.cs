@@ -11,7 +11,7 @@ public static class AppMessageBox
         {
             Owner = owner
         };
-        
+
         window.ShowDialog();
     }
 }

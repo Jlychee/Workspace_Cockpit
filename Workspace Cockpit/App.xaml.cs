@@ -3,12 +3,18 @@ using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Workspace_Cockpit.Helpers;
+using Workspace_Cockpit.Windows;
 
 namespace Workspace_Cockpit;
 
 public partial class App : Application
 {
     private ServiceProvider? serviceProvider;
+
+    public App()
+    {
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+    }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
