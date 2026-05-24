@@ -14,10 +14,12 @@ public static class DependencyInjection
             options.UseSqlite(DbPathProvider.GetConnectionString()));
 
         services.AddSingleton<DatabaseInitializer>();
+
         services.AddSingleton<WorkspaceRepository>();
         services.AddSingleton<WorkspaceActionRepository>();
         services.AddSingleton<WorkspaceNoteRepository>();
         services.AddSingleton<WorkspaceLogRepository>();
+
         services.AddScoped<WorkspaceTimestampService>();
 
         return services;

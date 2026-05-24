@@ -2,15 +2,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class DatabaseInitializer
+public class DatabaseInitializer(IDbContextFactory<AppDbContext> dbContextFactory)
 {
-    private readonly IDbContextFactory<AppDbContext> dbContextFactory;
-
-    public DatabaseInitializer(IDbContextFactory<AppDbContext> dbContextFactory)
-    {
-        this.dbContextFactory = dbContextFactory;
-    }
-
     public async Task InitializeAsync()
     {
         Directory.CreateDirectory(DbPathProvider.GetDatabaseDirectory());

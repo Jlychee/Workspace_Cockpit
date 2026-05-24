@@ -5,7 +5,9 @@ using Models.Entities;
 
 namespace Infrastructure.Repositories;
 
-public class WorkspaceNoteRepository(IDbContextFactory<AppDbContext> dbContextFactory, WorkspaceTimestampService workspaceTimestampService)
+public class WorkspaceNoteRepository(
+    IDbContextFactory<AppDbContext> dbContextFactory,
+    WorkspaceTimestampService workspaceTimestampService)
 {
     public async Task AddNoteAsync(int workspaceId, WorkspaceNote note)
     {
@@ -19,7 +21,7 @@ public class WorkspaceNoteRepository(IDbContextFactory<AppDbContext> dbContextFa
         workspaceTimestampService.Update(dbContext, workspaceId);
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task DeleteNoteAsync(WorkspaceNote note)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -33,7 +35,7 @@ public class WorkspaceNoteRepository(IDbContextFactory<AppDbContext> dbContextFa
         workspaceTimestampService.Update(dbContext, existing.WorkspaceId);
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task UpdateNoteAsync(WorkspaceNote note)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

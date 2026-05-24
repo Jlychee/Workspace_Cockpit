@@ -24,7 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     private static void ConfigureWorkspaces(EntityTypeBuilder<WorkspaceItem> workspace)
     {
         workspace.ToTable("workspaces");
-        
+
         workspace.HasKey(x => x.Id);
 
         workspace.Property(x => x.Id)

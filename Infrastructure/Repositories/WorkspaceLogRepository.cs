@@ -5,7 +5,9 @@ using Models.Entities;
 
 namespace Infrastructure.Repositories;
 
-public class WorkspaceLogRepository(IDbContextFactory<AppDbContext> dbContextFactory, WorkspaceTimestampService workspaceTimestampService)
+public class WorkspaceLogRepository(
+    IDbContextFactory<AppDbContext> dbContextFactory,
+    WorkspaceTimestampService workspaceTimestampService)
 {
     public async Task AddLogAsync(WorkspaceAction action, WorkspaceLog run)
     {
@@ -43,15 +45,16 @@ public class WorkspaceLogRepository(IDbContextFactory<AppDbContext> dbContextFac
             .OrderByDescending(x => x.StartedAtUtc)
             .ToListAsync();
     }
+
     public async Task DeleteLogAsync(WorkspaceLog action)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        
+
         var existing = await dbContext.ActionRuns.FindAsync(action.Id);
-        
+
         if (existing is null)
             return;
-        
+
         dbContext.ActionRuns.Remove(existing);
         await dbContext.SaveChangesAsync();
     }
@@ -62,7 +65,7 @@ public class WorkspaceLogRepository(IDbContextFactory<AppDbContext> dbContextFac
 
         var runs = dbContext.ActionRuns
             .Where(x => x.WorkspaceId == workspaceId);
-        
+
         dbContext.ActionRuns.RemoveRange(runs);
         await dbContext.SaveChangesAsync();
     }

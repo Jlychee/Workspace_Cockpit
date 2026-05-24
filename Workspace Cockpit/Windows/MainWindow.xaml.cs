@@ -18,22 +18,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly WorkspaceNoteRepository noteRepository;
     private readonly WorkspaceActionRepository actionRepository;
     private readonly WorkspaceLogRepository logRepository;
-    private WorkspaceItem? selectedWorkspace;
-    private WorkspaceAction? selectedAction;
-    private WorkspaceNote? selectedNote;
 
     public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceLog> ActionRuns { get; } = [];
 
     public WorkspaceItem? SelectedWorkspace
     {
-        get => selectedWorkspace;
+        get;
         set
         {
-            if (ReferenceEquals(selectedWorkspace, value))
+            if (ReferenceEquals(field, value))
                 return;
 
-            selectedWorkspace = value;
+            field = value;
             SelectedAction = null;
             SelectedNote = null;
             OnPropertyChanged();
@@ -44,20 +41,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     public WorkspaceAction? SelectedAction
     {
-        get => selectedAction;
+        get;
         set
         {
-            selectedAction = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public WorkspaceNote? SelectedNote
     {
-        get => selectedNote;
+        get;
         set
         {
-            selectedNote = value;
+            field = value;
             OnPropertyChanged();
         }
     }

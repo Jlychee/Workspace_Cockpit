@@ -5,7 +5,9 @@ using Models.Entities;
 
 namespace Infrastructure.Repositories;
 
-public class WorkspaceActionRepository(IDbContextFactory<AppDbContext> dbContextFactory, WorkspaceTimestampService  workspaceTimestampService)
+public class WorkspaceActionRepository(
+    IDbContextFactory<AppDbContext> dbContextFactory,
+    WorkspaceTimestampService workspaceTimestampService)
 {
     public async Task AddActionAsync(int workspaceId, WorkspaceAction action)
     {
@@ -19,7 +21,7 @@ public class WorkspaceActionRepository(IDbContextFactory<AppDbContext> dbContext
         workspaceTimestampService.Update(dbContext, workspaceId, DateTime.UtcNow);
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task UpdateActionAsync(WorkspaceAction action)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -39,7 +41,7 @@ public class WorkspaceActionRepository(IDbContextFactory<AppDbContext> dbContext
         workspaceTimestampService.Update(dbContext, existing.WorkspaceId);
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task DeleteActionAsync(WorkspaceAction action)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
