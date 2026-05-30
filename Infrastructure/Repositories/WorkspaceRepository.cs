@@ -11,8 +11,8 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await dbContext.Workspaces
-            .Include(x => x.Notes.OrderByDescending(note => note.UpdatedAtUtc))
-            .Include(x => x.Actions.OrderBy(action => action.Name))
+            .Include(x => x.Notes.OrderBy(note => note.SortOrder).ThenBy(note => note.Id))
+            .Include(x => x.Actions.OrderBy(action => action.SortOrder).ThenBy(action => action.Id))
             .OrderByDescending(x => x.LastOpenedAtUtc ?? x.UpdatedAtUtc)
             .ToListAsync();
     }

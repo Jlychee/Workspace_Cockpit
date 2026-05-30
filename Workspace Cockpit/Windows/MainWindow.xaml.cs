@@ -6,7 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using Infrastructure.Repositories;
 using Models.Entities;
 using Models.Enums;
@@ -20,6 +22,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly WorkspaceNoteRepository noteRepository;
     private readonly WorkspaceActionRepository actionRepository;
     private readonly WorkspaceLogRepository logRepository;
+    private const string ActionDragFormat = "WorkspaceCockpit.Action";
+    private const string NoteDragFormat = "WorkspaceCockpit.Note";
+    private Point dragStartPoint;
 
     public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceLog> ActionRuns { get; } = [];
@@ -585,6 +590,188 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         OnPropertyChanged(nameof(SelectedWorkspace));
     }
 
+    private void ReorderList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        dragStartPoint = e.GetPosition(this);
+    }
+
+    private void ActionList_MouseMove(object sender, MouseEventArgs e)
+    {
+        StartListDrag<WorkspaceAction>(sender, e, ActionDragFormat);
+    }
+
+    private void NoteList_MouseMove(object sender, MouseEventArgs e)
+    {
+        StartListDrag<WorkspaceNote>(sender, e, NoteDragFormat);
+    }
+
+    private void ActionList_DragOver(object sender, DragEventArgs e)
+    {
+        UpdateDragEffects(e, ActionDragFormat);
+    }
+
+    private void NoteList_DragOver(object sender, DragEventArgs e)
+    {
+        UpdateDragEffects(e, NoteDragFormat);
+    }
+
+    private async void ActionList_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(ActionDragFormat) is not WorkspaceAction action)
+            return;
+
+        await ReorderItemsAsync(
+            sender,
+            e,
+            SelectedWorkspace?.Actions,
+            action,
+            static (item, index) => item.SortOrder = index,
+            actionRepository.UpdateActionOrderAsync,
+            "Reorder actions error");
+    }
+
+    private async void NoteList_Drop(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetData(NoteDragFormat) is not WorkspaceNote note)
+            return;
+
+        await ReorderItemsAsync(
+            sender,
+            e,
+            SelectedWorkspace?.Notes,
+            note,
+            static (item, index) => item.SortOrder = index,
+            noteRepository.UpdateNoteOrderAsync,
+            "Reorder notes error");
+    }
+
+    private void StartListDrag<T>(object sender, MouseEventArgs e, string dataFormat)
+        where T : class
+    {
+        if (sender is not ListBox || e.LeftButton != MouseButtonState.Pressed)
+            return;
+
+        if (e.OriginalSource is not DependencyObject source)
+            return;
+
+        if (FindVisualParent<ButtonBase>(source) is not null)
+            return;
+
+        var currentPosition = e.GetPosition(this);
+        if (Math.Abs(currentPosition.X - dragStartPoint.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(currentPosition.Y - dragStartPoint.Y) < SystemParameters.MinimumVerticalDragDistance)
+            return;
+
+        var listBoxItem = FindVisualParent<ListBoxItem>(source);
+        if (listBoxItem?.DataContext is not T item)
+            return;
+
+        DragDrop.DoDragDrop(listBoxItem, new DataObject(dataFormat, item), DragDropEffects.Move);
+    }
+
+    private async Task ReorderItemsAsync<T>(
+        object sender,
+        DragEventArgs e,
+        ObservableCollection<T>? collection,
+        T draggedItem,
+        Action<T, int> setSortOrder,
+        Func<int, IReadOnlyList<T>, Task> saveOrderAsync,
+        string errorTitle)
+        where T : class
+    {
+        e.Handled = true;
+
+        if (SelectedWorkspace is null || sender is not ListBox || collection is null)
+            return;
+
+        var sourceIndex = collection.IndexOf(draggedItem);
+        if (sourceIndex < 0)
+            return;
+
+        var dropIndex = GetDropIndex(e, collection);
+        if (dropIndex > sourceIndex)
+            dropIndex--;
+
+        dropIndex = Math.Clamp(dropIndex, 0, collection.Count - 1);
+        if (dropIndex == sourceIndex)
+            return;
+
+        var workspaceId = SelectedWorkspace.Id;
+        var originalItems = collection.ToList();
+
+        collection.Move(sourceIndex, dropIndex);
+        NormalizeSortOrder(collection, setSortOrder);
+
+        try
+        {
+            await saveOrderAsync(workspaceId, collection.ToList());
+            TouchSelectedWorkspace();
+        }
+        catch (Exception ex)
+        {
+            RestoreCollection(collection, originalItems);
+            NormalizeSortOrder(collection, setSortOrder);
+            AppMessageBox.Show(this, errorTitle, ex.Message);
+        }
+    }
+
+    private static int GetDropIndex<T>(DragEventArgs e, ObservableCollection<T> collection)
+        where T : class
+    {
+        if (e.OriginalSource is not DependencyObject source)
+            return collection.Count;
+
+        var targetContainer = FindVisualParent<ListBoxItem>(source);
+        if (targetContainer?.DataContext is not T targetItem)
+            return collection.Count;
+
+        var targetIndex = collection.IndexOf(targetItem);
+        if (targetIndex < 0)
+            return collection.Count;
+
+        var targetPosition = e.GetPosition(targetContainer);
+        return targetPosition.Y > targetContainer.ActualHeight / 2
+            ? targetIndex + 1
+            : targetIndex;
+    }
+
+    private static void UpdateDragEffects(DragEventArgs e, string dataFormat)
+    {
+        e.Effects = e.Data.GetDataPresent(dataFormat)
+            ? DragDropEffects.Move
+            : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private static void NormalizeSortOrder<T>(IReadOnlyList<T> items, Action<T, int> setSortOrder)
+    {
+        for (var index = 0; index < items.Count; index++)
+            setSortOrder(items[index], index);
+    }
+
+    private static void RestoreCollection<T>(ObservableCollection<T> collection, IReadOnlyList<T> items)
+    {
+        collection.Clear();
+        foreach (var item in items)
+            collection.Add(item);
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject? source)
+        where T : DependencyObject
+    {
+        while (source is not null)
+        {
+            if (source is T match)
+                return match;
+
+            source = source is Visual || source is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(source)
+                : LogicalTreeHelper.GetParent(source);
+        }
+
+        return null;
+    }
+
     private async void EditNote_Click(object sender, RoutedEventArgs e)
     {
         if (SelectedWorkspace is null || SelectedNote is null)
@@ -640,6 +827,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async void ClearLog_Click(object sender, RoutedEventArgs e)
     {
+        if (SelectedWorkspace is null)
+            return;
+
         await logRepository.ClearLogsAsync(SelectedWorkspace.Id);
         ActionRuns.Clear();
     }
