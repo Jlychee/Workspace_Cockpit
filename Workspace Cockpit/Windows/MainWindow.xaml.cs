@@ -24,7 +24,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly WorkspaceLogRepository logRepository;
     private const string ActionDragFormat = "WorkspaceCockpit.Action";
     private const string NoteDragFormat = "WorkspaceCockpit.Note";
+    private const string DropBeforeTag = "DropBefore";
+    private const string DropAfterTag = "DropAfter";
     private Point dragStartPoint;
+    private ListBoxItem? dropIndicatorItem;
 
     public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceLog> ActionRuns { get; } = [];
@@ -607,16 +610,26 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void ActionList_DragOver(object sender, DragEventArgs e)
     {
-        UpdateDragEffects(e, ActionDragFormat);
+        UpdateDragIndicator<WorkspaceAction>(sender, e, SelectedWorkspace?.Actions, ActionDragFormat);
     }
 
     private void NoteList_DragOver(object sender, DragEventArgs e)
     {
-        UpdateDragEffects(e, NoteDragFormat);
+        UpdateDragIndicator<WorkspaceNote>(sender, e, SelectedWorkspace?.Notes, NoteDragFormat);
+    }
+
+    private void ReorderList_DragLeave(object sender, DragEventArgs e)
+    {
+        if (sender is ListBox listBox && listBox.IsMouseOver)
+            return;
+
+        ClearDropIndicator();
     }
 
     private async void ActionList_Drop(object sender, DragEventArgs e)
     {
+        ClearDropIndicator();
+
         if (e.Data.GetData(ActionDragFormat) is not WorkspaceAction action)
             return;
 
@@ -632,6 +645,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async void NoteList_Drop(object sender, DragEventArgs e)
     {
+        ClearDropIndicator();
+
         if (e.Data.GetData(NoteDragFormat) is not WorkspaceNote note)
             return;
 
@@ -666,7 +681,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (listBoxItem?.DataContext is not T item)
             return;
 
-        DragDrop.DoDragDrop(listBoxItem, new DataObject(dataFormat, item), DragDropEffects.Move);
+        try
+        {
+            ClearDropIndicator();
+            DragDrop.DoDragDrop(listBoxItem, new DataObject(dataFormat, item), DragDropEffects.Move);
+        }
+        finally
+        {
+            ClearDropIndicator();
+        }
     }
 
     private async Task ReorderItemsAsync<T>(
@@ -688,7 +711,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (sourceIndex < 0)
             return;
 
-        var dropIndex = GetDropIndex(e, collection);
+        var dropIndex = GetDropPlacement(e, collection).DropIndex;
         if (dropIndex > sourceIndex)
             dropIndex--;
 
@@ -715,24 +738,69 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private static int GetDropIndex<T>(DragEventArgs e, ObservableCollection<T> collection)
+    private void UpdateDragIndicator<T>(
+        object sender,
+        DragEventArgs e,
+        ObservableCollection<T>? collection,
+        string dataFormat)
+        where T : class
+    {
+        UpdateDragEffects(e, dataFormat);
+
+        if (e.Effects == DragDropEffects.None ||
+            sender is not ListBox listBox ||
+            collection is null ||
+            e.Data.GetData(dataFormat) is not T draggedItem)
+        {
+            ClearDropIndicator();
+            return;
+        }
+
+        var sourceIndex = collection.IndexOf(draggedItem);
+        if (sourceIndex < 0)
+        {
+            ClearDropIndicator();
+            return;
+        }
+
+        var placement = GetDropPlacement(e, collection, listBox);
+        var adjustedDropIndex = placement.DropIndex > sourceIndex
+            ? placement.DropIndex - 1
+            : placement.DropIndex;
+
+        if (placement.TargetContainer is null || adjustedDropIndex == sourceIndex)
+        {
+            ClearDropIndicator();
+            return;
+        }
+
+        ShowDropIndicator(
+            placement.TargetContainer,
+            placement.InsertAfter ? DropAfterTag : DropBeforeTag);
+    }
+
+    private static (int DropIndex, ListBoxItem? TargetContainer, bool InsertAfter) GetDropPlacement<T>(
+        DragEventArgs e,
+        ObservableCollection<T> collection,
+        ListBox? listBox = null)
         where T : class
     {
         if (e.OriginalSource is not DependencyObject source)
-            return collection.Count;
+            return (collection.Count, GetLastContainer(listBox, collection.Count), true);
 
         var targetContainer = FindVisualParent<ListBoxItem>(source);
         if (targetContainer?.DataContext is not T targetItem)
-            return collection.Count;
+            return (collection.Count, GetLastContainer(listBox, collection.Count), true);
 
         var targetIndex = collection.IndexOf(targetItem);
         if (targetIndex < 0)
-            return collection.Count;
+            return (collection.Count, GetLastContainer(listBox, collection.Count), true);
 
         var targetPosition = e.GetPosition(targetContainer);
-        return targetPosition.Y > targetContainer.ActualHeight / 2
-            ? targetIndex + 1
-            : targetIndex;
+        var insertAfter = targetPosition.Y > targetContainer.ActualHeight / 2;
+        var dropIndex = insertAfter ? targetIndex + 1 : targetIndex;
+
+        return (dropIndex, targetContainer, insertAfter);
     }
 
     private static void UpdateDragEffects(DragEventArgs e, string dataFormat)
@@ -741,6 +809,32 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             ? DragDropEffects.Move
             : DragDropEffects.None;
         e.Handled = true;
+    }
+
+    private void ShowDropIndicator(ListBoxItem targetContainer, string marker)
+    {
+        if (!ReferenceEquals(dropIndicatorItem, targetContainer))
+            ClearDropIndicator();
+
+        targetContainer.Tag = marker;
+        dropIndicatorItem = targetContainer;
+    }
+
+    private void ClearDropIndicator()
+    {
+        if (dropIndicatorItem is null)
+            return;
+
+        dropIndicatorItem.ClearValue(TagProperty);
+        dropIndicatorItem = null;
+    }
+
+    private static ListBoxItem? GetLastContainer(ListBox? listBox, int itemCount)
+    {
+        if (listBox is null || itemCount == 0)
+            return null;
+
+        return listBox.ItemContainerGenerator.ContainerFromIndex(itemCount - 1) as ListBoxItem;
     }
 
     private static void NormalizeSortOrder<T>(IReadOnlyList<T> items, Action<T, int> setSortOrder)
