@@ -28,6 +28,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private const string DropAfterTag = "DropAfter";
     private Point dragStartPoint;
     private ListBoxItem? dropIndicatorItem;
+    private bool isRunningAllActions;
 
     public ObservableCollection<WorkspaceItem> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceLog> ActionRuns { get; } = [];
@@ -229,11 +230,27 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async void RunAllActions_Click(object sender, RoutedEventArgs e)
     {
-        if (SelectedWorkspace is null)
+        if (SelectedWorkspace is null || isRunningAllActions)
             return;
 
-        foreach (var action in SelectedWorkspace.Actions.ToList())
-            await RunWorkspaceActionAsync(action);
+        isRunningAllActions = true;
+        RunAllButton.IsEnabled = false;
+
+        try
+        {
+            var actions = SelectedWorkspace.Actions
+                .OrderBy(action => action.SortOrder)
+                .ThenBy(action => action.Id)
+                .ToList();
+
+            foreach (var action in actions)
+                await RunWorkspaceActionAsync(action);
+        }
+        finally
+        {
+            isRunningAllActions = false;
+            RunAllButton.IsEnabled = true;
+        }
     }
 
     private async Task RunWorkspaceActionAsync(WorkspaceAction action)
