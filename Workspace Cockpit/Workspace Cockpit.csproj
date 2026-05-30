@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <ApplicationIcon>..\Assets\cockpit-workspace.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -48,6 +49,12 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\Assets\cockpit-workspace.ico">
+        <Link>cockpit-workspace.ico</Link>
+      </None>
     </ItemGroup>
 
 </Project>
