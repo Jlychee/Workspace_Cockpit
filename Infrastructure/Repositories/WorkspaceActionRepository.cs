@@ -17,6 +17,12 @@ public class WorkspaceActionRepository(
         action.UpdatedAtUtc = now;
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var maxSortOrder = await dbContext.WorkspaceActions
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Select(x => (int?)x.SortOrder)
+            .MaxAsync() ?? -1;
+
+        action.SortOrder = maxSortOrder + 1;
         dbContext.WorkspaceActions.Add(action);
         workspaceTimestampService.Update(dbContext, workspaceId, DateTime.UtcNow);
         await dbContext.SaveChangesAsync();
@@ -39,6 +45,29 @@ public class WorkspaceActionRepository(
 
         action.UpdatedAtUtc = now;
         workspaceTimestampService.Update(dbContext, existing.WorkspaceId);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateActionOrderAsync(int workspaceId, IReadOnlyList<WorkspaceAction> orderedActions)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var actionIds = orderedActions.Select(x => x.Id).ToList();
+        var existingActions = await dbContext.WorkspaceActions
+            .Where(x => x.WorkspaceId == workspaceId && actionIds.Contains(x.Id))
+            .ToListAsync();
+        var existingById = existingActions.ToDictionary(x => x.Id);
+
+        for (var index = 0; index < orderedActions.Count; index++)
+        {
+            var action = orderedActions[index];
+            action.SortOrder = index;
+
+            if (existingById.TryGetValue(action.Id, out var existing))
+                existing.SortOrder = index;
+        }
+
+        workspaceTimestampService.Update(dbContext, workspaceId);
         await dbContext.SaveChangesAsync();
     }
 

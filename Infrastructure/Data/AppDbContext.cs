@@ -80,6 +80,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         note.Property(x => x.WorkspaceId).HasColumnName("workspace_id");
         note.Property(x => x.Type).HasColumnName("type").IsRequired();
         note.Property(x => x.Text).HasColumnName("text").IsRequired();
+        note.Property(x => x.SortOrder).HasColumnName("sort_order").IsRequired();
         note.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc").IsRequired();
         note.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc").IsRequired();
 
@@ -87,6 +88,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         note.Ignore(x => x.UpdatedText);
 
         note.HasIndex(x => x.WorkspaceId).HasDatabaseName("ix_workspace_notes_workspace_id");
+        note.HasIndex(x => new { x.WorkspaceId, x.SortOrder }).HasDatabaseName("ix_workspace_notes_workspace_id_sort_order");
         note.HasIndex(x => x.UpdatedAtUtc).HasDatabaseName("ix_workspace_notes_updated_at_utc");
     }
 
@@ -100,6 +102,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         action.Property(x => x.Name).HasColumnName("name").IsRequired();
         action.Property(x => x.Target).HasColumnName("target").IsRequired();
         action.Property(x => x.WorkingDirectory).HasColumnName("working_directory").IsRequired();
+        action.Property(x => x.SortOrder).HasColumnName("sort_order").IsRequired();
         action.Property(x => x.ActionType)
             .HasConversion<string>()
             .HasColumnName("action_type")
@@ -117,6 +120,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .OnDelete(DeleteBehavior.Cascade);
 
         action.HasIndex(x => x.WorkspaceId).HasDatabaseName("ix_workspace_actions_workspace_id");
+        action.HasIndex(x => new { x.WorkspaceId, x.SortOrder }).HasDatabaseName("ix_workspace_actions_workspace_id_sort_order");
         action.HasIndex(x => x.UpdatedAtUtc).HasDatabaseName("ix_workspace_actions_updated_at_utc");
     }
 

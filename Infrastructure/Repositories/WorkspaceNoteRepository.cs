@@ -17,6 +17,12 @@ public class WorkspaceNoteRepository(
         note.UpdatedAtUtc = now;
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var maxSortOrder = await dbContext.WorkspaceNotes
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Select(x => (int?)x.SortOrder)
+            .MaxAsync() ?? -1;
+
+        note.SortOrder = maxSortOrder + 1;
         dbContext.WorkspaceNotes.Add(note);
         workspaceTimestampService.Update(dbContext, workspaceId);
         await dbContext.SaveChangesAsync();
@@ -33,6 +39,29 @@ public class WorkspaceNoteRepository(
         var now = DateTime.UtcNow;
         dbContext.WorkspaceNotes.Remove(existing);
         workspaceTimestampService.Update(dbContext, existing.WorkspaceId);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateNoteOrderAsync(int workspaceId, IReadOnlyList<WorkspaceNote> orderedNotes)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var noteIds = orderedNotes.Select(x => x.Id).ToList();
+        var existingNotes = await dbContext.WorkspaceNotes
+            .Where(x => x.WorkspaceId == workspaceId && noteIds.Contains(x.Id))
+            .ToListAsync();
+        var existingById = existingNotes.ToDictionary(x => x.Id);
+
+        for (var index = 0; index < orderedNotes.Count; index++)
+        {
+            var note = orderedNotes[index];
+            note.SortOrder = index;
+
+            if (existingById.TryGetValue(note.Id, out var existing))
+                existing.SortOrder = index;
+        }
+
+        workspaceTimestampService.Update(dbContext, workspaceId);
         await dbContext.SaveChangesAsync();
     }
 

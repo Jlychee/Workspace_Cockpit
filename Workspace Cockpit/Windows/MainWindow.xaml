@@ -267,7 +267,8 @@
                                            HorizontalAlignment="Right"
                                            VerticalAlignment="Top">
 
-                                    <Button Content="▶ Run all"
+                                    <Button x:Name="RunAllButton"
+                                            Content="▶ Run all"
                                             Style="{StaticResource PrimaryButton}"
                                             Margin="0,0,8,0"
                                             Click="RunAllActions_Click" />
@@ -377,9 +378,16 @@
 
                                             <!-- Actions list -->
                                             <ListBox Grid.Row="1"
+                                                     x:Name="ActionList"
                                                      Margin="14,12"
                                                      ItemsSource="{Binding SelectedWorkspace.Actions}"
                                                      SelectedItem="{Binding SelectedAction}"
+                                                     AllowDrop="True"
+                                                     PreviewMouseLeftButtonDown="ReorderList_PreviewMouseLeftButtonDown"
+                                                     MouseMove="ActionList_MouseMove"
+                                                     DragOver="ActionList_DragOver"
+                                                     DragLeave="ReorderList_DragLeave"
+                                                     Drop="ActionList_Drop"
                                                      PreviewMouseWheel="ListBox_PreviewMouseWheel"
                                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
@@ -489,9 +497,16 @@
 
                                             <!-- Notes list -->
                                             <ListBox Grid.Row="1"
+                                                     x:Name="NoteList"
                                                      Margin="14,12"
                                                      ItemsSource="{Binding SelectedWorkspace.Notes}"
                                                      SelectedItem="{Binding SelectedNote, Mode=TwoWay}"
+                                                     AllowDrop="True"
+                                                     PreviewMouseLeftButtonDown="ReorderList_PreviewMouseLeftButtonDown"
+                                                     MouseMove="NoteList_MouseMove"
+                                                     DragOver="NoteList_DragOver"
+                                                     DragLeave="ReorderList_DragLeave"
+                                                     Drop="NoteList_Drop"
                                                      PreviewMouseWheel="ListBox_PreviewMouseWheel"
                                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 

@@ -393,6 +393,24 @@
                                         CornerRadius="3,0,0,3" />
 
                                 <ContentPresenter Margin="10,9,10,9" />
+
+                                <Border x:Name="DropBeforeIndicator"
+                                        Height="3"
+                                        Margin="8,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Top"
+                                        Background="{StaticResource BlueBrush}"
+                                        CornerRadius="2"
+                                        Visibility="Collapsed" />
+
+                                <Border x:Name="DropAfterIndicator"
+                                        Height="3"
+                                        Margin="8,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Bottom"
+                                        Background="{StaticResource BlueBrush}"
+                                        CornerRadius="2"
+                                        Visibility="Collapsed" />
                             </Grid>
                         </Border>
 
@@ -404,6 +422,16 @@
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Root" Property="Background" Value="#1B2430" />
                                 <Setter TargetName="Accent" Property="Background" Value="{StaticResource BlueBrush}" />
+                            </Trigger>
+
+                            <Trigger Property="Tag" Value="DropBefore">
+                                <Setter TargetName="Root" Property="Background" Value="#10213A" />
+                                <Setter TargetName="DropBeforeIndicator" Property="Visibility" Value="Visible" />
+                            </Trigger>
+
+                            <Trigger Property="Tag" Value="DropAfter">
+                                <Setter TargetName="Root" Property="Background" Value="#10213A" />
+                                <Setter TargetName="DropAfterIndicator" Property="Visibility" Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
